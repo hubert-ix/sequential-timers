@@ -46,7 +46,7 @@
     <ul class="row-list" use:dndzone={{ items: $sequences, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each $sequences as sequence (sequence.id)}
         <li>
-          <div class="glass glass-hover group-item" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
+          <div class="glass glass-hover sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
             <span class="badge"><TimerIcon size={20} /></span>
             <div class="sequence-info">
               <div class="sequence-name">{sequence.name}</div>
@@ -97,6 +97,46 @@
     font-size: .875rem; 
     max-width: 28rem; 
     margin-top: .75rem;
+  }
+
+  .sequence {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    cursor: pointer;
+  }
+
+  .sequence .badge {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--gradient-primary);
+    color: var(--primary-foreground);
+    box-shadow: var(--shadow-glow);
+    flex-shrink: 0;
+  }
+
+  .sequence .arrow {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: oklch(0.35 0.04 60 / 0.06);
+    color: var(--muted-foreground);
+    transition: all 0.2s;
+  }
+
+  .sequence:hover .arrow {
+    background: oklch(0.58 0.055 235 / 0.2);
+    color: var(--foreground);
+    transform: rotate(45deg);
   }
 
   .sequence-info {

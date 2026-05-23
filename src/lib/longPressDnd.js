@@ -6,7 +6,7 @@ export function longPressEnable(node, opts) {
   let startX = 0;
   let startY = 0;
   let moved = false;
-  let delay = opts.delay ?? 100;
+  let delay = opts.delay ?? 300;
 
   function down(e) {
     moved = false;

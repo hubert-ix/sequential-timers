@@ -31,38 +31,81 @@
 
 <div class="glass editor fade-in">
   <div class="row">
-    <input
-      bind:value={name}
-      placeholder="Timer name"
-      style="flex: 1; min-width: 0; background: transparent; border: 0; outline: none; padding: .625rem 1rem; font-size: .875rem; font-weight: 500;"
-    />
-    <div class="row" style="flex-shrink: 0; gap: .5rem;">
+    <input class="input-name" bind:value={name} placeholder="Timer name" />
+    <div class="row">
       <select bind:value={sound} onchange={() => playSound(sound)}>
         {#each SOUND_OPTIONS as o}
           <option value={o.id}>{o.label}</option>
         {/each}
       </select>
-      <button type="button" class="icon-btn" style="width: 2rem; height: 2rem; border: 1px solid var(--border); background: oklch(0.96 0.015 85);" onclick={() => playSound(sound)} aria-label="Preview sound">
+      <button type="button" class="icon-btn icon-sound" onclick={() => playSound(sound)} aria-label="Preview sound">
         <Volume2 size={14} />
       </button>
     </div>
   </div>
 
-  <div class="row" style="margin: 1.25rem 0; justify-content: center; gap: .75rem;">
+  <div class="row duration">
     <SlideWheel value={mins} max={99} onChange={(v) => (mins = v)} />
-    <span style="font-size: 1.5rem; color: var(--muted-foreground); font-weight: 300;">:</span>
+    <span class="separator">:</span>
     <SlideWheel value={secs} max={59} onChange={(v) => (secs = v)} />
   </div>
 
-  <div class="row" style="justify-content: space-between;">
-    <div class="row" style="gap: .5rem;">
+  <div class="row buttons">
+    <div class="row save">
       <button class="btn btn-primary" onclick={save}>Save</button>
       <button class="btn btn-ghost" onclick={onCancel}>Cancel</button>
     </div>
     {#if onRemove}
-      <button class="icon-btn danger" style="border: 1px solid var(--border); background: oklch(0.96 0.015 85); border-radius: .75rem;" onclick={onRemove} aria-label="Delete timer">
+      <button class="icon-btn danger icon-delete" onclick={onRemove} aria-label="Delete timer">
         <Trash2 size={16} />
       </button>
     {/if}
   </div>
 </div>
+
+
+<style>
+  .input-name {
+    flex: 1; 
+    min-width: 0; 
+    background: transparent; 
+    border: 0; 
+    outline: none; 
+    padding: .625rem 1rem; 
+    font-size: .875rem; 
+    font-weight: 500;
+  }
+
+  .icon-sound {
+    width: 2rem; 
+    height: 2rem; 
+    border: 1px solid var(--border); 
+    background: oklch(0.96 0.015 85);
+  }
+
+  .row.duration {
+    margin: 1.25rem 0; 
+    margin-top: 0;
+    justify-content: center; 
+  }
+
+  .separator {
+    font-size: 1.5rem; 
+    color: var(--muted-foreground); 
+    font-weight: 300;
+  }
+
+  .row.buttons {
+    justify-content: space-between;
+  }
+
+  .row.save {
+    gap: .5rem;
+  }
+
+  .icon-delete {
+    border: 1px solid var(--border); 
+    background: oklch(0.96 0.015 85); 
+    border-radius: .75rem;
+  }
+</style>

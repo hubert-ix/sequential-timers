@@ -156,46 +156,6 @@ h1 {
   gap: 0.625rem;
 }
 
-.group-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  border-radius: 1rem;
-  cursor: pointer;
-}
-
-.group-item .badge {
-  width: 3rem;
-  height: 3rem;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--gradient-primary);
-  color: var(--primary-foreground);
-  box-shadow: var(--shadow-glow);
-  flex-shrink: 0;
-}
-
-.group-item .arrow {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: oklch(0.35 0.04 60 / 0.06);
-  color: var(--muted-foreground);
-  transition: all 0.2s;
-}
-
-.group-item:hover .arrow {
-  background: oklch(0.58 0.055 235 / 0.2);
-  color: var(--foreground);
-  transform: rotate(45deg);
-}
-
 .timer-row {
   display: flex;
   align-items: center;
@@ -270,7 +230,7 @@ h1 {
   background: transparent;
   border: 0;
   outline: none;
-  padding: 0.5rem;
+  padding: 0;
   font-size: 1.5rem;
   font-weight: 600;
   letter-spacing: -0.01em;
