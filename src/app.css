@@ -1,22 +1,9 @@
 :root {
-  --foreground: oklch(0.28 0.025 60);
-  --primary-foreground: oklch(0.99 0.005 235);
   --muted-foreground: oklch(0.5 0.02 60);
   --destructive: oklch(0.6 0.22 25);
   --primary: rgb(79, 70, 229);
   --secondary: rgb(237, 237, 248);
   --border: rgb(229, 231, 235);
-  --gradient-primary: linear-gradient(
-    135deg,
-    oklch(0.64 0.05 235),
-    oklch(0.52 0.06 235)
-  );
-  --shadow-card: 0 1px 2px oklch(0.4 0.08 60 / 0.04),
-    0 4px 16px oklch(0.4 0.08 60 / 0.06);
-  --shadow-card-hover: 0 2px 4px oklch(0.4 0.08 60 / 0.06),
-    0 12px 32px oklch(0.4 0.08 60 / 0.1);
-  --shadow-glow: 0 0 0 1px oklch(0.58 0.055 235 / 0.15),
-    0 6px 24px oklch(0.58 0.055 235 / 0.18);
 }
 
 * {
@@ -32,7 +19,7 @@ body {
 
 body {
   background: rgb(243, 243, 251);
-  color: var(--foreground);
+  color: #000;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -72,34 +59,10 @@ select {
   color: inherit;
 }
 
-.glass {
-  background: oklch(1 0 0);
-  border: 1px solid oklch(0.35 0.04 60 / 0.1);
-  box-shadow: var(--shadow-card);
-  border-radius: 1rem;
-}
-
-.glass-hover {
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-}
-
-.glass-hover:hover {
-  border-color: oklch(0.35 0.04 60 / 0.18);
-  box-shadow: var(--shadow-card-hover);
-}
-
 .smooth {
   transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.bg-gradient-primary {
-  background: var(--gradient-primary);
-  color: var(--primary-foreground);
-}
-
-.shadow-glow {
-  box-shadow: var(--shadow-glow);
-}
 
 h1 {
   font-size: 2.5rem;
@@ -108,11 +71,14 @@ h1 {
   color: #000;
 }
 
-.h2 {
+h2 {
   font-size: 1.5rem;
   font-weight: 600;
-  letter-spacing: -0.01em;
   margin: 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.25rem;
 }
 
 .muted {
@@ -164,18 +130,6 @@ h1 {
 .btn-ghost {
   background: var(--secondary);
   border: 1px solid var(--border);
-}
-
-.input-bare {
-  width: 100%;
-  background: transparent;
-  border: 0;
-  outline: none;
-  padding: 0;
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: var(--foreground);
 }
 
 .icon-btn {
@@ -257,7 +211,6 @@ h1 {
   border-radius: 1rem;
   max-width: 28rem;
   width: calc(100% - 2rem);
-  box-shadow: var(--shadow-card-hover);
 }
 
 .dialog h3 {

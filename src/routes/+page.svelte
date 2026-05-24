@@ -69,7 +69,7 @@
 
     <div class="add-section">
       {#if adding}
-        <div class="glass add-block">
+        <div class="add-block">
           <input
             bind:value={newName}
             onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { adding = false; newName = ''; } }}
@@ -81,7 +81,7 @@
           <button class="btn cancel" onclick={() => { adding = false; newName = ''; }}>Cancel</button>
         </div>
       {:else}
-        <button class="glass glass-hover add-btn" onclick={() => { adding = true; }}>
+        <button class="add-btn" onclick={() => { adding = true; }}>
           <Plus size={16} /> New sequence
         </button>
       {/if}

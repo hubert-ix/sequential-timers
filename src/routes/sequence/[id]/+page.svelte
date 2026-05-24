@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/sounds';
-  import { ArrowLeft, Trash2, Plus, Play, Pause, Square, SkipForward, Timer as TimerIcon  } from 'lucide-svelte';
+  import { ArrowLeft, Trash2, Plus, Play, Pause, Square, SkipForward, Timer as TimerIcon, Edit, Pen  } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import TimerEditor from '$lib/TimerEditor.svelte';
@@ -180,10 +180,12 @@
           onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }}
         />
       {:else}
-        <h1 class="h2 editable-title"
-            onclick={() => { nameDraft = sequence.name; editingName = true; }}>
+        <h2>
           {sequence.name}
-        </h1>
+          <div class="edit-icon">
+            <Pen size="15" onclick={() => { nameDraft = sequence.name; editingName = true;  }} />
+          </div>
+        </h2>
       {/if}
     </div>
     
@@ -208,7 +210,7 @@
               <button class="btn btn-primary" onclick={resume}><Play size={16} /> Resume</button>
             {/if}
             <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
-            <button class="glass glass-hover btn" onclick={skip}><SkipForward size={16} /> Skip</button>
+            <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
           </div>
         </div>
       {:else}
@@ -375,7 +377,6 @@
   }
 
   .timer.active {
-    box-shadow: var(--shadow-glow);
     border-color: #ccc;
   }
 
@@ -432,5 +433,21 @@
     color: #000;
     font-size: 1.2rem;
     font-weight: 600;
+  }
+
+  .input-bare {
+    width: 100%;
+    background: transparent;
+    border: 0;
+    outline: none;
+    padding: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #000;
+    margin-bottom: 0.25rem;
+  }
+
+  .edit-icon {
+    cursor: pointer;
   }
 </style>

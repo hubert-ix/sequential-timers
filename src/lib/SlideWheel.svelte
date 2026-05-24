@@ -102,6 +102,6 @@
   .wheel-scroll li.active {
     font-size: 1.5rem;
     font-weight: 600;
-    color: var(--foreground);
+    color: #000;
   }
 </style>
