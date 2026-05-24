@@ -1,7 +1,7 @@
 <script>
   import { sequences } from '$lib/timers-store';
   import { formatTime, uid } from '$lib/timers-store';
-  import { ArrowUpRight, Plus, Timer as TimerIcon } from 'lucide-svelte';
+  import { ArrowUpRight, Plus, Play, Timer as TimerIcon } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import { goto } from '$app/navigation';
@@ -37,28 +37,31 @@
   <div class="container lg">
 
     <header>
-      <h1>Sequential timers</h1>
-      <p class="subtitle muted">
-        Chain timers into seamless routines. Tap a sequence to run it.
-      </p>
+      <h1>Sequences</h1>
+      <div class="add-sequence">
+        <Plus size="20" />
+      </div>
     </header>
 
     <ul class="row-list" use:dndzone={{ items: $sequences, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each $sequences as sequence (sequence.id)}
         <li>
-          <div class="glass glass-hover sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
-            <span class="badge"><TimerIcon size={20} /></span>
+          <div class="sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
             <div class="sequence-info">
-              <div class="sequence-name">{sequence.name}</div>
+              <div class="sequence-name">
+                {sequence.name}
+              </div>
               <div class="sequence-timers muted tabular">
                 {#if sequence.timers.length === 0}
                   Empty sequence
                 {:else}
-                  {sequence.timers.length} step{sequence.timers.length === 1 ? '' : 's'} · {formatTime(sequence.timers.reduce((a, t) => a + t.seconds, 0))}
+                  {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(sequence.timers.reduce((a, t) => a + t.seconds, 0))}
                 {/if}
               </div>
             </div>
-            <span class="arrow"><ArrowUpRight size={16} /></span>
+            <div class="arrow">
+              <Play size={16} />
+            </div>
           </div>
         </li>
       {/each}
@@ -66,7 +69,7 @@
 
     <div class="add-section">
       {#if adding}
-        <div class="glass row add-block">
+        <div class="glass add-block">
           <input
             bind:value={newName}
             onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { adding = false; newName = ''; } }}
@@ -90,13 +93,24 @@
 
 <style>
   header {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: solid 1px rgb(229, 231, 235);
   }
 
-  .subtitle {
-    font-size: .875rem; 
-    max-width: 28rem; 
-    margin-top: .75rem;
+  .add-sequence {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(79, 70, 229);
+    transition: all 0.2s;
+    color: #fff;
   }
 
   .sequence {
@@ -104,21 +118,11 @@
     align-items: center;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    border-radius: 1rem;
     cursor: pointer;
-  }
-
-  .sequence .badge {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--gradient-primary);
-    color: var(--primary-foreground);
-    box-shadow: var(--shadow-glow);
-    flex-shrink: 0;
+    box-shadow: rgba(0, 0, 0, 0.04) 0px 0px 0px;
+    background-color: rgb(255, 255, 255);
+    border: solid 1px var(--border);
+    border-radius: 1rem;
   }
 
   .sequence .arrow {
@@ -128,15 +132,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: oklch(0.35 0.04 60 / 0.06);
-    color: var(--muted-foreground);
+    background: rgb(79, 70, 229);
     transition: all 0.2s;
-  }
-
-  .sequence:hover .arrow {
-    background: oklch(0.58 0.055 235 / 0.2);
-    color: var(--foreground);
-    transform: rotate(45deg);
+    color: #fff;
   }
 
   .sequence-info {

@@ -29,7 +29,7 @@
 </script>
 
 
-<div class="glass editor fade-in">
+<div class="editor">
   <div class="row">
     <input class="input-name" bind:value={name} placeholder="Timer name" />
     <div class="row">
@@ -38,7 +38,7 @@
           <option value={o.id}>{o.label}</option>
         {/each}
       </select>
-      <button type="button" class="icon-btn icon-sound" onclick={() => playSound(sound)} aria-label="Preview sound">
+      <button type="button" class="icon-btn ghost icon-sound" onclick={() => playSound(sound)} aria-label="Preview sound">
         <Volume2 size={14} />
       </button>
     </div>
@@ -56,7 +56,7 @@
       <button class="btn btn-ghost" onclick={onCancel}>Cancel</button>
     </div>
     {#if onRemove}
-      <button class="icon-btn danger icon-delete" onclick={onRemove} aria-label="Delete timer">
+      <button class="icon-btn ghost" onclick={onRemove} aria-label="Delete timer">
         <Trash2 size={16} />
       </button>
     {/if}
@@ -72,15 +72,15 @@
     border: 0; 
     outline: none; 
     padding: .625rem 1rem; 
-    font-size: .875rem; 
+    padding-left: 0;
+    font-size: 1rem; 
     font-weight: 500;
   }
 
   .icon-sound {
     width: 2rem; 
     height: 2rem; 
-    border: 1px solid var(--border); 
-    background: oklch(0.96 0.015 85);
+    border-radius: 0.5rem;
   }
 
   .row.duration {
@@ -103,9 +103,19 @@
     gap: .5rem;
   }
 
-  .icon-delete {
-    border: 1px solid var(--border); 
-    background: oklch(0.96 0.015 85); 
-    border-radius: .75rem;
+  .editor {
+    padding: 1rem 1.25rem;
+    border-radius: 1rem;
+    border: solid 1px var(--border);
+    background: #fff;
+  }
+
+  .editor select {
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.5rem;
+    background: var(--secondary);
+    border: 1px solid var(--border);
+    font-size: 0.75rem;
+    font-weight: 500;
   }
 </style>

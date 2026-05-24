@@ -10,15 +10,22 @@
 
 
 <div class="ring" style="width: {size}px; height: {size}px;">
-  <div class="glass" style="position: absolute; inset: 0; border-radius: 9999px;"></div>
+  <div class="ring-inner"></div>
   <svg width={size} height={size} style="position: absolute; inset: 0; transform: rotate(-90deg);">
-    <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="oklch(0 0 0 / 0.08)" stroke-width={stroke} />
+    <circle 
+      cx={size / 2} 
+      cy={size / 2} 
+      r={r} 
+      fill="none" 
+      stroke="oklch(0 0 0 / 0.08)" 
+      stroke-width={stroke} 
+    />
     <circle
       cx={size / 2}
       cy={size / 2}
       r={r}
       fill="none"
-      stroke="oklch(0.58 0.055 235)"
+      stroke="rgb(79, 70, 229)"
       stroke-width={stroke}
       stroke-linecap="round"
       stroke-dasharray={c}
@@ -29,3 +36,25 @@
   <div class="inner">{@render children()}</div>
 </div>
 
+
+<style>
+  .ring {
+    position: relative;
+  }
+
+  .ring .inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ring-inner {
+    position: absolute; 
+    inset: 0; 
+    border-radius: 9999px;
+    background: #fff;
+  }
+</style>

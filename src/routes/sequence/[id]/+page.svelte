@@ -3,7 +3,7 @@
   import { goto } from '$app/navigation';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/sounds';
-  import { ArrowLeft, Trash2, Plus, Play, Pause, Square, SkipForward } from 'lucide-svelte';
+  import { ArrowLeft, Trash2, Plus, Play, Pause, Square, SkipForward, Timer as TimerIcon  } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import TimerEditor from '$lib/TimerEditor.svelte';
@@ -162,92 +162,104 @@
 <main>
   <div class="container">
 
-    <div class="row fade-in row-spaced">
-      <a href="/" class="glass glass-hover icon-btn" aria-label="Back"><ArrowLeft size={16} /></a>
-      <div class="flex-1-min0">
-        {#if editingName}
-          <input
-            class="input-bare"
-            bind:value={nameDraft}
-            onblur={commitName}
-            onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }}
-          />
-        {:else}
-          <h1 class="h2 editable-title"
-              onclick={() => { nameDraft = sequence.name; editingName = true; }}>
-            {sequence.name}
-          </h1>
-        {/if}
-      </div>
-      <button class="glass glass-hover icon-btn danger" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
+    <header>
+      <a href="/" class="back" aria-label="Back">
+        <ArrowLeft size="25" />
+      </a>
+      <button class="icon-btn" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
         <Trash2 size={16} />
       </button>
+    </header>
+
+    <div class="heading">
+      {#if editingName}
+        <input
+          class="input-bare"
+          bind:value={nameDraft}
+          onblur={commitName}
+          onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }}
+        />
+      {:else}
+        <h1 class="h2 editable-title"
+            onclick={() => { nameDraft = sequence.name; editingName = true; }}>
+          {sequence.name}
+        </h1>
+      {/if}
     </div>
     
     <p class="muted tabular meta-line">
-      {sequence.timers.length} step{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
+      {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
     </p>
 
-    {#if activeIdx !== null && activeTimer}
-      <div class="stage fade-in">
-        <ProgressRing progress={progress} size={260} stroke={6}>
-          {#snippet children()}
-            <div class="label">Step {activeIdx + 1} / {sequence.timers.length}</div>
-            <div class="time">{formatTime(Math.max(0, remaining))}</div>
-            <div class="name">{activeTimer.name}</div>
-          {/snippet}
-        </ProgressRing>
-        <div class="row stage-controls">
-          {#if running}
-            <button class="btn btn-primary" onclick={pause}><Pause size={16} /> Pause</button>
-          {:else}
-            <button class="btn btn-primary" onclick={resume}><Play size={16} /> Resume</button>
-          {/if}
-          <button class="glass glass-hover btn" onclick={stop}><Square size={16} /> Stop</button>
-          <button class="glass glass-hover btn" onclick={skip}><SkipForward size={16} /> Skip</button>
+    {#if sequence.timers.length}
+
+      {#if activeIdx !== null && activeTimer}
+        <div class="stage fade-in">
+          <ProgressRing progress={progress} size={260} stroke={6}>
+            {#snippet children()}
+              <div class="time">{formatTime(Math.max(0, remaining))}</div>
+              <div class="name">{activeTimer.name}</div>
+            {/snippet}
+          </ProgressRing>
+          <div class="row stage-controls">
+            {#if running}
+              <button class="btn btn-primary" onclick={pause}><Pause size={16} /> Pause</button>
+            {:else}
+              <button class="btn btn-primary" onclick={resume}><Play size={16} /> Resume</button>
+            {/if}
+            <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
+            <button class="glass glass-hover btn" onclick={skip}><SkipForward size={16} /> Skip</button>
+          </div>
+        </div>
+      {:else}
+        <div class="start-wrap">
+          <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
+            <Play size={20} />
+          </button>
+        </div>
+      {/if}
+
+      <ul class="row-list" use:dndzone={{ items: sequence.timers, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+        {#each sequence.timers as t, i (t.id)}
+          <li>
+            {#if editingTimerId === t.id}
+              <TimerEditor
+                initialName={t.name}
+                initialSeconds={t.seconds}
+                initialSound={t.sound ?? DEFAULT_SOUND}
+                onSave={(name, seconds, sound) => { updateTimer(t.id, { name, seconds, sound }); editingTimerId = null; }}
+                onCancel={() => (editingTimerId = null)}
+                onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
+              />
+            {:else}
+              <div class="timer {activeIdx === i ? 'active' : ''}" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => { editingTimerId = t.id; } }}>
+                <span class="num">
+                  {String(i + 1)}
+                </span>
+                <div class="timer-name">
+                  {t.name}
+                </div>
+                <div class="tabular timer-time">
+                  {formatTime(t.seconds)}
+                </div>
+              </div>
+            {/if}
+          </li>
+        {/each}
+      </ul>
+    {:else}
+      <div class="no-timers">
+        <div class="icon-no-timers">
+          <TimerIcon size="25" />
+        </div>
+        <div class="no-timers-heading">
+          No timers yet
+        </div>
+        <div class="muted no-timers-text">
+          Add timers to build your sequence
         </div>
       </div>
-    {:else}
-      <div class="start-wrap">
-        <button class="btn btn-primary start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
-          <Play size={14} /> Start sequence
-        </button>
-      </div>
     {/if}
-
-    <ul
-      class="row-list"
-      use:dndzone={{ items: sequence.timers, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }}
-      onconsider={handleConsider}
-      onfinalize={handleFinalize}
-    >
-      {#each sequence.timers as t, i (t.id)}
-        <li>
-          {#if editingTimerId === t.id}
-            <TimerEditor
-              initialName={t.name}
-              initialSeconds={t.seconds}
-              initialSound={t.sound ?? DEFAULT_SOUND}
-              onSave={(name, seconds, sound) => { updateTimer(t.id, { name, seconds, sound }); editingTimerId = null; }}
-              onCancel={() => (editingTimerId = null)}
-              onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
-            />
-          {:else}
-            <div
-              class="glass glass-hover timer-row {activeIdx === i ? 'active' : ''}"
-              use:longPressEnable={{
-                onEnable: () => { dragDisabled = false; },
-                onClick: () => { editingTimerId = t.id; }
-              }}
-            >
-              <span class="num">{String(i + 1).padStart(2, '0')}</span>
-              <div class="timer-name">{t.name}</div>
-              <div class="tabular timer-time">{formatTime(t.seconds)}</div>
-            </div>
-          {/if}
-        </li>
-      {/each}
-    </ul>
 
     <div class="add-wrap">
       {#if addingNew}
@@ -259,8 +271,8 @@
           onCancel={() => (addingNew = false)}
         />
       {:else}
-        <button class="glass glass-hover add-btn" onclick={() => (addingNew = true)}>
-          <Plus size={16} /> Add timer
+        <button class="add-btn" onclick={() => (addingNew = true)}>
+          <Plus size={20} />
         </button>
       {/if}
     </div>
@@ -284,13 +296,15 @@
 
 
 <style>
-  .row-spaced {
-    margin-bottom: .75rem;
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
   }
 
-  .flex-1-min0 {
-    flex: 1;
-    min-width: 0;
+  .back {
+    color: var(--primary);
   }
 
   .editable-title {
@@ -320,7 +334,14 @@
   }
 
   .start-btn {
-    padding: .875rem 1.75rem;
+    background-color: rgb(79, 70, 229);
+    width: 4rem;
+    height: 4rem;
+    border-radius: 100%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .timer-name {
@@ -338,5 +359,78 @@
 
   .add-wrap {
     margin-top: 1rem;
+  }
+
+  .timer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    box-shadow: rgba(0, 0, 0, 0.04) 0px 0px 0px;
+    background-color: rgb(255, 255, 255);
+    border: solid 1px var(--border);
+    border-radius: 1rem;
+  }
+
+  .timer.active {
+    box-shadow: var(--shadow-glow);
+    border-color: #ccc;
+  }
+
+  .timer .num {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgb(237, 237, 248);
+    color: var(--muted-foreground);
+  }
+
+  .timer.active .num {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .add-btn {
+    background: var(--primary);
+    color: #fff;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .no-timers {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+  .icon-no-timers {
+    width: 4rem;
+    height: 4rem;
+    background: var(--secondary);
+    color: #333;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .no-timers-heading {
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: 600;
   }
 </style>
