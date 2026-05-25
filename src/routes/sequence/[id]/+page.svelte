@@ -161,134 +161,131 @@
 </script>
 
 
-<main>
-  <div class="container">
+<div class="container">
 
-    {#if !activeTimer}
-      <header>
-        <a href="/" class="back" aria-label="Back">
-          <ArrowLeft size="25" />
-        </a>
-        <button class="icon" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
-          <Trash2 size={16} />
+  {#if !activeTimer}
+    <header>
+      <a href="/" class="back" aria-label="Back">
+        <ArrowLeft size="25" />
+      </a>
+      <button class="icon" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
+        <Trash2 size={16} />
+      </button>
+    </header>
+  {/if}
+
+  <div class="heading">
+    {#if editingName}
+      <input class="input-bare" autofocus bind:value={nameDraft} onblur={commitName} onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }} />
+    {:else}
+      <h2>
+        {sequence.name}
+        {#if !activeTimer}
+          <div class="edit-icon">
+            <Pen size="15" onclick={() => { nameDraft = sequence.name; editingName = true;  }} />
+          </div>
+        {/if}
+      </h2>
+    {/if}
+  </div>
+  
+  <p class="muted tabular meta-line">
+    {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
+  </p>
+
+  {#if sequence.timers.length}
+
+    {#if activeIdx !== null && activeTimer}
+      <div class="stage fade-in">
+        <ProgressRing progress={progress} size={260} stroke={6}>
+          {#snippet children()}
+            <div class="time">{formatTime(Math.max(0, remaining))}</div>
+            <div class="name">{activeTimer.name}</div>
+          {/snippet}
+        </ProgressRing>
+        <div class="row stage-controls">
+          {#if running}
+            <button class="btn primary" onclick={pause}><Pause size={16} /> Pause</button>
+          {:else}
+            <button class="btn primary" onclick={resume}><Play size={16} /> Resume</button>
+          {/if}
+          <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
+          <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
+        </div>
+      </div>
+    {:else}
+      <div class="start-wrap">
+        <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
+          <Play size={20} />
         </button>
-      </header>
+      </div>
     {/if}
 
-    <div class="heading">
-      {#if editingName}
-        <input class="input-bare" autofocus bind:value={nameDraft} onblur={commitName} onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }} />
-      {:else}
-        <h2>
-          {sequence.name}
-          {#if !activeTimer}
-            <div class="edit-icon">
-              <Pen size="15" onclick={() => { nameDraft = sequence.name; editingName = true;  }} />
+    <ul class="row-list" use:dndzone={{ items: sequence.timers, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+      {#each sequence.timers as t, i (t.id)}
+        <li>
+          {#if editingTimerId === t.id}
+            <TimerEditor
+              initialName={t.name}
+              initialSeconds={t.seconds}
+              initialSound={t.sound ?? DEFAULT_SOUND}
+              onSave={(name, seconds, sound) => { updateTimer(t.id, { name, seconds, sound }); editingTimerId = null; }}
+              onCancel={() => (editingTimerId = null)}
+              onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
+            />
+          {:else}
+            <div class="timer {activeIdx === i ? 'active' : ''}" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => { editingTimerId = t.id; } }}>
+              <span class="num">
+                {String(i + 1)}
+              </span>
+              <div class="timer-name">
+                {t.name}
+              </div>
+              <div class="tabular timer-time">
+                {formatTime(t.seconds)}
+              </div>
             </div>
           {/if}
-        </h2>
-      {/if}
+        </li>
+      {/each}
+    </ul>
+  {:else}
+    <NoResults heading="No timers yet" text="Add timers to build your sequence" />
+  {/if}
+
+  {#if !activeTimer}
+    <footer>
+      <button class="add" onclick={() => (addingNew = true)}>
+        <Plus size={20} /> New timer
+      </button>
+    </footer>
+  {/if}
+
+</div>
+
+{#if confirmDelete}
+  <Modal close={() => (confirmDelete = false)}>
+    <h3>Delete this sequence?</h3>
+    <p class="muted text-small">"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
+    <div class="actions">
+      <button class="btn btn-danger" onclick={deleteSequenceNow}>Delete</button>
+      <button class="btn btn-ghost" onclick={() => (confirmDelete = false)}>Cancel</button>
     </div>
-    
-    <p class="muted tabular meta-line">
-      {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
-    </p>
+  </Modal>
+{/if}
 
-    {#if sequence.timers.length}
-
-      {#if activeIdx !== null && activeTimer}
-        <div class="stage fade-in">
-          <ProgressRing progress={progress} size={260} stroke={6}>
-            {#snippet children()}
-              <div class="time">{formatTime(Math.max(0, remaining))}</div>
-              <div class="name">{activeTimer.name}</div>
-            {/snippet}
-          </ProgressRing>
-          <div class="row stage-controls">
-            {#if running}
-              <button class="btn primary" onclick={pause}><Pause size={16} /> Pause</button>
-            {:else}
-              <button class="btn primary" onclick={resume}><Play size={16} /> Resume</button>
-            {/if}
-            <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
-            <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
-          </div>
-        </div>
-      {:else}
-        <div class="start-wrap">
-          <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
-            <Play size={20} />
-          </button>
-        </div>
-      {/if}
-
-      <ul class="row-list" use:dndzone={{ items: sequence.timers, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
-        {#each sequence.timers as t, i (t.id)}
-          <li>
-            {#if editingTimerId === t.id}
-              <TimerEditor
-                initialName={t.name}
-                initialSeconds={t.seconds}
-                initialSound={t.sound ?? DEFAULT_SOUND}
-                onSave={(name, seconds, sound) => { updateTimer(t.id, { name, seconds, sound }); editingTimerId = null; }}
-                onCancel={() => (editingTimerId = null)}
-                onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
-              />
-            {:else}
-              <div class="timer {activeIdx === i ? 'active' : ''}" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => { editingTimerId = t.id; } }}>
-                <span class="num">
-                  {String(i + 1)}
-                </span>
-                <div class="timer-name">
-                  {t.name}
-                </div>
-                <div class="tabular timer-time">
-                  {formatTime(t.seconds)}
-                </div>
-              </div>
-            {/if}
-          </li>
-        {/each}
-      </ul>
-    {:else}
-      <NoResults heading="No timers yet" text="Add timers to build your sequence" />
-    {/if}
-
-    {#if !activeTimer}
-      <footer>
-        <button class="add" onclick={() => (addingNew = true)}>
-          <Plus size={20} /> New timer
-        </button>
-      </footer>
-    {/if}
-
-  </div>
-
-  {#if confirmDelete}
-    <Modal close={() => (confirmDelete = false)}>
-      <h3>Delete this sequence?</h3>
-      <p class="muted text-small">"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
-      <div class="actions">
-        <button class="btn btn-ghost" onclick={() => (confirmDelete = false)}>Cancel</button>
-        <button class="btn btn-danger" onclick={deleteSequenceNow}>Delete</button>
-      </div>
-    </Modal>
-  {/if}
-
-  {#if addingNew}
-    <Modal close={() => (addingNew = false)}>
-      <TimerEditor
-        initialName={`Timer ${sequence.timers.length + 1}`}
-        initialSeconds={60}
-        initialSound={DEFAULT_SOUND}
-        showBorder={false}
-        onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNew = false; }}
-        onCancel={() => (addingNew = false)}
-      />
-    </Modal>
-  {/if}
-
-</main>
+{#if addingNew}
+  <Modal close={() => (addingNew = false)}>
+    <TimerEditor
+      initialName={`Timer ${sequence.timers.length + 1}`}
+      initialSeconds={60}
+      initialSound={DEFAULT_SOUND}
+      showBorder={false}
+      onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNew = false; }}
+      onCancel={() => (addingNew = false)}
+    />
+  </Modal>
+{/if}
 
 
 <style>

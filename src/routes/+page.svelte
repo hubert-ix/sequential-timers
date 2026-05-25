@@ -37,56 +37,53 @@
 </script>
 
 
-<main>
-  <div class="container">
+<div class="container">
 
-    {#if $sequences.length}
-      <ul class="row-list" use:dndzone={{ items: $sequences, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
-        {#each $sequences as sequence (sequence.id)}
-          <li>
-            <div class="sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
-              <div class="sequence-info">
-                <div class="sequence-name">
-                  {sequence.name}
-                </div>
-                <div class="sequence-timers muted tabular">
-                  {#if sequence.timers.length === 0}
-                    Empty sequence
-                  {:else}
-                    {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(sequence.timers.reduce((a, t) => a + t.seconds, 0))}
-                  {/if}
-                </div>
+  {#if $sequences.length}
+    <ul class="row-list" use:dndzone={{ items: $sequences, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+      {#each $sequences as sequence (sequence.id)}
+        <li>
+          <div class="sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
+            <div class="sequence-info">
+              <div class="sequence-name">
+                {sequence.name}
               </div>
-              <div class="arrow">
-                <Play size={16} />
+              <div class="sequence-timers muted tabular">
+                {#if sequence.timers.length === 0}
+                  Empty sequence
+                {:else}
+                  {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(sequence.timers.reduce((a, t) => a + t.seconds, 0))}
+                {/if}
               </div>
             </div>
-          </li>
-        {/each}
-      </ul>
-    {:else}
-      <NoResults heading="No sequences yet" text="Create a new awesome sequence!" />
-    {/if}
-
-    <footer>
-      <button class="add" onclick={() => { adding = true; }}>
-        <Plus size="20" /> New sequence
-      </button>
-    </footer>
-
-  </div>
-
-  {#if adding}
-    <Modal>
-      <input bind:value={newName} placeholder="Sequence name" id="add-input" class="add-input" autofocus onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { adding = false; newName = ''; } }} />
-      <div class="buttons">
-        <button class="btn primary" onclick={addSequence}>Create</button>
-        <button class="btn cancel" onclick={() => { adding = false; newName = ''; }}>Cancel</button>
-      </div>
-    </Modal>
+            <div class="arrow">
+              <Play size={16} />
+            </div>
+          </div>
+        </li>
+      {/each}
+    </ul>
+  {:else}
+    <NoResults heading="No sequences yet" text="Create a new awesome sequence!" />
   {/if}
 
-</main>
+  <footer>
+    <button class="add" onclick={() => { adding = true; }}>
+      <Plus size="20" /> New sequence
+    </button>
+  </footer>
+
+</div>
+
+{#if adding}
+  <Modal>
+    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="add-input" autofocus onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { adding = false; newName = ''; } }} />
+    <div class="actions">
+      <button class="btn primary" onclick={addSequence}>Create</button>
+      <button class="btn cancel" onclick={() => { adding = false; newName = ''; }}>Cancel</button>
+    </div>
+  </Modal>
+{/if}
 
 
 <style>
