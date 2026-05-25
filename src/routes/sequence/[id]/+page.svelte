@@ -6,8 +6,10 @@
   import { ArrowLeft, Trash2, Plus, Play, Pause, Square, SkipForward, Timer as TimerIcon, Edit, Pen  } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
+  import Modal from '$lib/Modal.svelte';
   import TimerEditor from '$lib/TimerEditor.svelte';
   import ProgressRing from '$lib/ProgressRing.svelte';
+  import NoResults from '$lib/NoResults.svelte';
 
   const id = $derived($page.params.id);
   const sequence = $derived($sequences.find((s) => s.id === id));
@@ -162,29 +164,28 @@
 <main>
   <div class="container">
 
-    <header>
-      <a href="/" class="back" aria-label="Back">
-        <ArrowLeft size="25" />
-      </a>
-      <button class="icon-btn" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
-        <Trash2 size={16} />
-      </button>
-    </header>
+    {#if !activeTimer}
+      <header>
+        <a href="/" class="back" aria-label="Back">
+          <ArrowLeft size="25" />
+        </a>
+        <button class="icon" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
+          <Trash2 size={16} />
+        </button>
+      </header>
+    {/if}
 
     <div class="heading">
       {#if editingName}
-        <input
-          class="input-bare"
-          bind:value={nameDraft}
-          onblur={commitName}
-          onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }}
-        />
+        <input class="input-bare" autofocus bind:value={nameDraft} onblur={commitName} onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }} />
       {:else}
         <h2>
           {sequence.name}
-          <div class="edit-icon">
-            <Pen size="15" onclick={() => { nameDraft = sequence.name; editingName = true;  }} />
-          </div>
+          {#if !activeTimer}
+            <div class="edit-icon">
+              <Pen size="15" onclick={() => { nameDraft = sequence.name; editingName = true;  }} />
+            </div>
+          {/if}
         </h2>
       {/if}
     </div>
@@ -205,9 +206,9 @@
           </ProgressRing>
           <div class="row stage-controls">
             {#if running}
-              <button class="btn btn-primary" onclick={pause}><Pause size={16} /> Pause</button>
+              <button class="btn primary" onclick={pause}><Pause size={16} /> Pause</button>
             {:else}
-              <button class="btn btn-primary" onclick={resume}><Play size={16} /> Resume</button>
+              <button class="btn primary" onclick={resume}><Play size={16} /> Resume</button>
             {/if}
             <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
             <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
@@ -250,48 +251,41 @@
         {/each}
       </ul>
     {:else}
-      <div class="no-timers">
-        <div class="icon-no-timers">
-          <TimerIcon size="25" />
-        </div>
-        <div class="no-timers-heading">
-          No timers yet
-        </div>
-        <div class="muted no-timers-text">
-          Add timers to build your sequence
-        </div>
-      </div>
+      <NoResults heading="No timers yet" text="Add timers to build your sequence" />
     {/if}
 
-    <div class="add-wrap">
-      {#if addingNew}
-        <TimerEditor
-          initialName={`Timer ${sequence.timers.length + 1}`}
-          initialSeconds={60}
-          initialSound={DEFAULT_SOUND}
-          onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNew = false; }}
-          onCancel={() => (addingNew = false)}
-        />
-      {:else}
-        <button class="add-btn" onclick={() => (addingNew = true)}>
-          <Plus size={20} />
+    {#if !activeTimer}
+      <footer>
+        <button class="add" onclick={() => (addingNew = true)}>
+          <Plus size={20} /> New timer
         </button>
-      {/if}
-    </div>
+      </footer>
+    {/if}
 
   </div>
 
   {#if confirmDelete}
-    <div class="dialog-backdrop" onclick={() => (confirmDelete = false)}>
-      <div class="dialog" onclick={(e) => e.stopPropagation()}>
-        <h3>Delete this sequence?</h3>
-        <p>"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
-        <div class="actions">
-          <button class="btn btn-ghost" onclick={() => (confirmDelete = false)}>Cancel</button>
-          <button class="btn btn-danger" onclick={deleteSequenceNow}>Delete</button>
-        </div>
+    <Modal close={() => (confirmDelete = false)}>
+      <h3>Delete this sequence?</h3>
+      <p class="muted text-small">"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
+      <div class="actions">
+        <button class="btn btn-ghost" onclick={() => (confirmDelete = false)}>Cancel</button>
+        <button class="btn btn-danger" onclick={deleteSequenceNow}>Delete</button>
       </div>
-    </div>
+    </Modal>
+  {/if}
+
+  {#if addingNew}
+    <Modal close={() => (addingNew = false)}>
+      <TimerEditor
+        initialName={`Timer ${sequence.timers.length + 1}`}
+        initialSeconds={60}
+        initialSound={DEFAULT_SOUND}
+        showBorder={false}
+        onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNew = false; }}
+        onCancel={() => (addingNew = false)}
+      />
+    </Modal>
   {/if}
 
 </main>
@@ -309,19 +303,16 @@
     color: var(--primary);
   }
 
-  .editable-title {
-    cursor: text;
-    padding: .25rem .5rem;
-    margin: 0 -.5rem;
-    border-radius: .5rem;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   .meta-line {
     font-size: .875rem;
     margin: 0 0 2.5rem;
+  }
+
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 2.5rem;
   }
 
   .stage-controls {
@@ -390,49 +381,12 @@
     font-size: 0.75rem;
     font-weight: 600;
     background: rgb(237, 237, 248);
-    color: var(--muted-foreground);
+    color: var(--muted);
   }
 
   .timer.active .num {
     background: var(--primary);
     color: #fff;
-  }
-
-  .add-btn {
-    background: var(--primary);
-    color: #fff;
-    width: 3rem;
-    height: 3rem;
-    border-radius: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .no-timers {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 2rem;
-  }
-
-  .icon-no-timers {
-    width: 4rem;
-    height: 4rem;
-    background: var(--secondary);
-    color: #333;
-    border-radius: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .no-timers-heading {
-    color: #000;
-    font-size: 1.2rem;
-    font-weight: 600;
   }
 
   .input-bare {

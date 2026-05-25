@@ -1,5 +1,5 @@
 :root {
-  --muted-foreground: oklch(0.5 0.02 60);
+  --muted: oklch(0.5 0.02 60);
   --destructive: oklch(0.6 0.22 25);
   --primary: rgb(79, 70, 229);
   --secondary: rgb(237, 237, 248);
@@ -20,8 +20,7 @@ body {
 body {
   background: rgb(243, 243, 251);
   color: #000;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: "ss01", "cv11";
 }
@@ -31,13 +30,9 @@ main {
 }
 
 .container {
-  max-width: 42rem;
+  max-width: 44rem;
   margin: 0 auto;
   padding: 2.5rem 1.25rem 8rem;
-}
-
-.container.lg {
-  padding-top: 4rem;
 }
 
 a {
@@ -59,11 +54,6 @@ select {
   color: inherit;
 }
 
-.smooth {
-  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-
 h1 {
   font-size: 2.5rem;
   font-weight: 600;
@@ -81,8 +71,26 @@ h2 {
   margin-bottom: 0.25rem;
 }
 
+h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.text-small {
+  font-size: 0.875rem;
+}
+
+footer {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  padding: 0 1rem;
+}
+
 .muted {
-  color: var(--muted-foreground);
+  color: var(--muted);
 }
 
 .tabular {
@@ -104,7 +112,7 @@ h2 {
   gap: 0.625rem;
 }
 
-.btn {
+button {
   padding: 0.625rem 1rem;
   border-radius: 0.75rem;
   font-size: 1rem;
@@ -117,22 +125,27 @@ h2 {
   transition: all 0.2s;
 }
 
-.btn-primary {
+button.primary {
   background: var(--primary);
   color: #fff;
 }
 
-.btn-primary:disabled {
+button.primary:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.btn-ghost {
+button.ghost {
   background: var(--secondary);
   border: 1px solid var(--border);
 }
 
-.icon-btn {
+button.cancel {
+  color: var(--muted);
+}
+
+button.icon {
+  padding: 0;
   width: 2.5rem;
   height: 2.5rem;
   display: flex;
@@ -144,22 +157,34 @@ h2 {
   border-radius: 0.75rem;
 }
 
-.icon-btn.ghost {
+button.icon.small {
+  width: 2rem; 
+  height: 2rem; 
+  border-radius: 0.5rem;
+}
+
+button.icon.ghost {
   background-color: var(--secondary);
 }
 
-.stage {
+button.add {
+  width: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  margin-bottom: 2.5rem;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--primary);
+  color: #fff;
+  border: solid 1px var(--primary);
+  border-radius: 1rem;
+  padding: 1rem;
 }
 
 .ring .label {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: var(--muted-foreground);
+  color: var(--muted);
   margin-bottom: 4px;
 }
 
@@ -195,43 +220,13 @@ h2 {
   animation: fade-in 0.35s ease-out;
 }
 
-.dialog-backdrop {
-  position: fixed;
-  inset: 0;
-  background: oklch(0 0 0 / 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-.dialog {
-  background: #fff;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  max-width: 28rem;
-  width: calc(100% - 2rem);
-}
-
-.dialog h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
-}
-
-.dialog p {
-  margin: 0 0 1.25rem;
-  color: var(--muted-foreground);
-  font-size: 0.875rem;
-}
-
-.dialog .actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.5rem;
-}
-
 .btn-danger {
   background: var(--destructive);
   color: white;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }
