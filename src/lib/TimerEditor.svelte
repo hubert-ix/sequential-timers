@@ -27,7 +27,7 @@
 
 <div class="editor" class:border={showBorder}>
   <div class="row">
-    <input class="input-name" autofocus bind:value={name} placeholder="Timer name" />
+    <input class="input-name" id="add-input" bind:value={name} placeholder="Timer name" />
     <div class="row">
       <select bind:value={sound} onchange={() => playSound(sound)}>
         {#each SOUND_OPTIONS as o}

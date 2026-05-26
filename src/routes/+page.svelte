@@ -1,4 +1,5 @@
 <script>
+  import { tick } from 'svelte';
   import { sequences } from '$lib/timers-store';
   import { formatTime, uid } from '$lib/timers-store';
   import { Plus, Play } from 'lucide-svelte';
@@ -8,7 +9,7 @@
   import NoResults from '$lib/NoResults.svelte';
   import Modal from '$lib/Modal.svelte';
 
-  let adding = $state(false);
+  let addingSequence = $state(false);
   let newName = $state('');
   let dragDisabled = $state(true);
 
@@ -18,7 +19,7 @@
     let newSequence = { id: uid(), name, timers: [] };
     $sequences = [...$sequences, newSequence];
     newName = '';
-    adding = false;
+    addingSequence = false;
     goto("/sequence/" + newSequence.id);
   }
 
@@ -39,76 +40,89 @@
 
 <div class="container">
 
+  <h1>Your sequences</h1>
+
   {#if $sequences.length}
-    <ul class="row-list" use:dndzone={{ items: $sequences, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+    <div class="sequences" use:dndzone={{ items: $sequences, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each $sequences as sequence (sequence.id)}
-        <li>
-          <div class="sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
-            <div class="sequence-info">
-              <div class="sequence-name">
-                {sequence.name}
-              </div>
-              <div class="sequence-timers muted tabular">
-                {#if sequence.timers.length === 0}
-                  Empty sequence
-                {:else}
-                  {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(sequence.timers.reduce((a, t) => a + t.seconds, 0))}
-                {/if}
-              </div>
+        <div class="sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
+          <div class="sequence-info">
+            <div class="sequence-name">
+              {sequence.name}
             </div>
-            <div class="arrow">
-              <Play size={16} />
+            <div class="sequence-timers">
+              {#if sequence.timers.length === 0}
+                Empty sequence
+              {:else}
+                {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(sequence.timers.reduce((a, t) => a + t.seconds, 0))}
+              {/if}
             </div>
           </div>
-        </li>
+          <div class="sequence-arrow">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
+          </div>
+        </div>
       {/each}
-    </ul>
+    </div>
   {:else}
     <NoResults heading="No sequences yet" text="Create a new awesome sequence!" />
   {/if}
 
-  <footer>
-    <button class="add" onclick={() => { adding = true; }}>
-      <Plus size="20" /> New sequence
-    </button>
-  </footer>
+  <button class="add" onclick={async () => { addingSequence = true; await tick(); document.getElementById("add-input").focus() }}>
+    <Plus size="20" /> New sequence
+  </button>
 
 </div>
 
-{#if adding}
+{#if addingSequence}
   <Modal>
-    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="add-input" autofocus onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { adding = false; newName = ''; } }} />
+    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text" autofocus onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; } }} />
     <div class="actions">
       <button class="btn primary" onclick={addSequence}>Create</button>
-      <button class="btn cancel" onclick={() => { adding = false; newName = ''; }}>Cancel</button>
+      <button class="btn ghost" onclick={() => { addingSequence = false; newName = ''; }}>Cancel</button>
     </div>
   </Modal>
 {/if}
 
 
 <style>
+  .sequences {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
   .sequence {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem 1.25rem;
+    padding: 1.25rem;
     cursor: pointer;
-    box-shadow: rgba(0, 0, 0, 0.04) 0px 0px 0px;
-    background-color: rgb(255, 255, 255);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    outline: 1px solid rgba(0, 0, 0, 0.05);
+    outline-offset: -1px;
+    background-color: #fff;
     border: solid 1px var(--border);
     border-radius: 1rem;
   }
 
-  .sequence .arrow {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 9999px;
+  .sequence-arrow {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgb(79, 70, 229);
+    background: var(--play);
     transition: all 0.2s;
-    color: #fff;
+    color: #424632;
+  }
+
+  .sequence-arrow svg {
+    width: 1rem;
+    height: 1rem;
+    position: relative;
+    left: 2px;
   }
 
   .sequence-info {
@@ -117,31 +131,21 @@
   }
 
   .sequence-name {
+    font-size: 1rem;
     font-weight: 600; 
     overflow: hidden; 
     text-overflow: ellipsis; 
     white-space: nowrap;
+    color: #424632;
   }
 
   .sequence-timers {
     font-size: .875rem;
+    margin-top: 0.25rem;
+    color: color-mix(in oklab, #424632 60%, transparent);
   }
 
   .add {
-    margin-top: 0.625rem;
-  }
-
-  .add-input {
-    flex: 1; 
-    background: transparent; 
-    border: 0; 
-    outline: none; 
-    padding: .625rem .75rem; 
-    font-size: 1rem;
-    border: solid 1px var(--border);
-    border-radius: 0.5rem;
-    background: #fff;
-    width: 100%;
-    margin-bottom: 0.5rem;
+    margin-top: 1rem;
   }
 </style>

@@ -1,6 +1,7 @@
 <script>
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
+  import { tick } from 'svelte';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/sounds';
   import { ArrowLeft, Trash2, Plus, Play, Pause, Square, SkipForward, Timer as TimerIcon, Edit, Pen  } from 'lucide-svelte';
@@ -14,16 +15,17 @@
   const id = $derived($page.params.id);
   const sequence = $derived($sequences.find((s) => s.id === id));
 
-  let editingName = $state(false);
   let nameDraft = $state('');
   let confirmDelete = $state(false);
-  let addingNew = $state(false);
+  let addingNewTimer = $state(false);
   let editingTimerId = $state(null);
+  let editingSequence = $state(false);
   let dragDisabled = $state(true);
-  let activeIdx = $state(null);
+  let activeIndex = $state(null);
   let remaining = $state(0);
   let running = $state(false);
   let interval = $state(null);
+  let completedIndices = $state(new Set());
 
   $effect(() => {
     if (running) {
@@ -33,25 +35,28 @@
   });
 
   $effect(() => {
-    if (activeIdx === null || !sequence) return;
+    if (activeIndex === null || !sequence) return;
     if (remaining <= 0) {
-      const finished = sequence.timers[activeIdx];
-      playSound(finished?.sound ?? DEFAULT_SOUND);
-      const next = activeIdx + 1;
+      const finished = sequence.timers[activeIndex];
+      playSound(finished?.sound ?? DEFAULT_SOUND, 3);
+      completedIndices = new Set([...completedIndices, activeIndex]);
+      const next = activeIndex + 1;
       if (next < sequence.timers.length) {
-        activeIdx = next;
+        activeIndex = next;
         remaining = sequence.timers[next].seconds;
       } 
       else {
         running = false;
-        activeIdx = null;
+        activeIndex = null;
+        completedIndices = new Set();
       }
     }
   });
 
   function startAll() {
     if (!sequence || sequence.timers.length === 0) return;
-    activeIdx = 0;
+    completedIndices = new Set();
+    activeIndex = 0;
     remaining = sequence.timers[0].seconds;
     running = true;
   }
@@ -66,20 +71,23 @@
 
   function stop() {
     running = false;
-    activeIdx = null;
+    activeIndex = null;
     remaining = 0;
+    completedIndices = new Set();
   }
 
   function skip() {
-    if (activeIdx === null || !sequence) return;
-    const next = activeIdx + 1;
+    if (activeIndex === null || !sequence) return;
+    const next = activeIndex + 1;
     if (next < sequence.timers.length) {
-      activeIdx = next;
+      completedIndices = new Set([...completedIndices, activeIndex]);
+      activeIndex = next;
       remaining = sequence.timers[next].seconds;
     } 
     else {
       running = false;
-      activeIdx = null;
+      activeIndex = null;
+      completedIndices = new Set();
     }
   }
 
@@ -121,13 +129,13 @@
     goto('/');
   }
 
-  function commitName() {
+  function saveSequence() {
     if (!sequence) return;
     const v = nameDraft.trim();
     if (v && v !== sequence.name) {
       updateSequence(sequence.id, (s) => ({ ...s, name: v }));
     }
-    editingName = false;
+    editingSequence = false;
   }
 
   function handleConsider(e) {
@@ -152,7 +160,7 @@
   );
 
   const activeTimer = $derived(
-    sequence && activeIdx !== null ? sequence.timers[activeIdx] : null
+    sequence && activeIndex !== null ? sequence.timers[activeIndex] : null
   );
 
   const progress = $derived(
@@ -166,44 +174,34 @@
   {#if !activeTimer}
     <header>
       <a href="/" class="back" aria-label="Back">
-        <ArrowLeft size="25" />
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
       </a>
-      <button class="icon" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
-        <Trash2 size={16} />
-      </button>
     </header>
   {/if}
 
   <div class="heading">
-    {#if editingName}
-      <input class="input-bare" autofocus bind:value={nameDraft} onblur={commitName} onkeydown={(e) => { if (e.key === 'Enter') commitName(); if (e.key === 'Escape') editingName = false; }} />
-    {:else}
+    <div class="left">
       <h2>
         {sequence.name}
         {#if !activeTimer}
-          <div class="edit-icon">
-            <Pen size="15" onclick={() => { nameDraft = sequence.name; editingName = true;  }} />
+          <div class="edit-icon" onclick={() => { nameDraft = sequence.name; editingSequence = true;  }}>
+            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
           </div>
         {/if}
       </h2>
-    {/if}
-  </div>
-  
-  <p class="muted tabular meta-line">
-    {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
-  </p>
-
-  {#if sequence.timers.length}
-
-    {#if activeIdx !== null && activeTimer}
-      <div class="stage fade-in">
-        <ProgressRing progress={progress} size={260} stroke={6}>
-          {#snippet children()}
-            <div class="time">{formatTime(Math.max(0, remaining))}</div>
-            <div class="name">{activeTimer.name}</div>
-          {/snippet}
-        </ProgressRing>
-        <div class="row stage-controls">
+      <div class="subtitle">
+        {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
+      </div>
+    </div>
+    <div class="right">
+      {#if !activeTimer}
+        {#if sequence.timers.length}
+          <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
+          </button>
+        {/if}
+      {:else}
+        <div class="row progress-controls">
           {#if running}
             <button class="btn primary" onclick={pause}><Pause size={16} /> Pause</button>
           {:else}
@@ -212,77 +210,91 @@
           <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
           <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
         </div>
-      </div>
-    {:else}
-      <div class="start-wrap">
-        <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
-          <Play size={20} />
-        </button>
-      </div>
-    {/if}
+      {/if}
+    </div>
+  </div>
+  
+  {#if sequence.timers.length}
 
-    <ul class="row-list" use:dndzone={{ items: sequence.timers, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+      <!--
+      <ProgressRing progress={progress} size={260} stroke={6}>
+        {#snippet children()}
+          <div class="time">{formatTime(Math.max(0, remaining))}</div>
+          <div class="name">{activeTimer.name}</div>
+        {/snippet}
+      </ProgressRing>
+      -->
+
+    <div class="timers" use:dndzone={{ items: sequence.timers, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each sequence.timers as t, i (t.id)}
-        <li>
-          {#if editingTimerId === t.id}
-            <TimerEditor
-              initialName={t.name}
-              initialSeconds={t.seconds}
-              initialSound={t.sound ?? DEFAULT_SOUND}
-              onSave={(name, seconds, sound) => { updateTimer(t.id, { name, seconds, sound }); editingTimerId = null; }}
-              onCancel={() => (editingTimerId = null)}
-              onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
-            />
-          {:else}
-            <div class="timer {activeIdx === i ? 'active' : ''}" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => { editingTimerId = t.id; } }}>
-              <span class="num">
-                {String(i + 1)}
-              </span>
-              <div class="timer-name">
-                {t.name}
-              </div>
-              <div class="tabular timer-time">
-                {formatTime(t.seconds)}
-              </div>
+        {#if editingTimerId === t.id}
+          <TimerEditor
+            initialName={t.name}
+            initialSeconds={t.seconds}
+            initialSound={t.sound ?? DEFAULT_SOUND}
+            onSave={(name, seconds, sound) => { updateTimer(t.id, { name, seconds, sound }); editingTimerId = null; }}
+            onCancel={() => (editingTimerId = null)}
+            onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
+          />
+        {:else}
+          <div class="timer {activeIndex === i ? 'current' : ''} {completedIndices.has(i) ? 'completed' : ''}" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: async () => { editingTimerId = t.id; await tick(); document.getElementById("add-input").focus() } }}>
+            <div class="timer-name">
+              {t.name}
             </div>
-          {/if}
-        </li>
+            <div class="timer-time">
+              {activeIndex === i ? formatTime(Math.max(0, remaining)) : formatTime(t.seconds)}
+            </div>
+          </div>
+        {/if}
       {/each}
-    </ul>
+      </div>
   {:else}
     <NoResults heading="No timers yet" text="Add timers to build your sequence" />
   {/if}
 
   {#if !activeTimer}
-    <footer>
-      <button class="add" onclick={() => (addingNew = true)}>
-        <Plus size={20} /> New timer
-      </button>
-    </footer>
+    <button class="add add-wrap" onclick={async () => {addingNewTimer = true; await tick(); document.getElementById("add-input").focus()}}>
+      <Plus size={20} /> New timer
+    </button>
   {/if}
 
 </div>
+
+{#if editingSequence}
+  <Modal close={() => (editingSequence = false)}>
+    <input class="text" autofocus bind:value={nameDraft} />
+    <div class="yo">
+      <div class="actions">
+        <button class="btn primary" onclick={saveSequence}>Save sequence</button>
+        <button class="btn ghost" onclick={() => (editingSequence = false)}>Cancel</button>
+      </div>
+      <button class="icon ghost" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
+        <Trash2 size={16} />
+      </button>
+    </div>
+  </Modal>
+{/if}
 
 {#if confirmDelete}
   <Modal close={() => (confirmDelete = false)}>
     <h3>Delete this sequence?</h3>
     <p class="muted text-small">"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
     <div class="actions">
-      <button class="btn btn-danger" onclick={deleteSequenceNow}>Delete</button>
-      <button class="btn btn-ghost" onclick={() => (confirmDelete = false)}>Cancel</button>
+      <button class="btn danger" onclick={deleteSequenceNow}>Delete</button>
+      <button class="btn ghost" onclick={() => (confirmDelete = false)}>Cancel</button>
     </div>
   </Modal>
 {/if}
 
-{#if addingNew}
-  <Modal close={() => (addingNew = false)}>
+{#if addingNewTimer}
+  <Modal close={() => (addingNewTimer = false)}>
     <TimerEditor
       initialName={`Timer ${sequence.timers.length + 1}`}
       initialSeconds={60}
       initialSound={DEFAULT_SOUND}
       showBorder={false}
-      onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNew = false; }}
-      onCancel={() => (addingNew = false)}
+      onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNewTimer = false; }}
+      onCancel={() => (addingNewTimer = false)}
     />
   </Modal>
 {/if}
@@ -297,36 +309,33 @@
   }
 
   .back {
-    color: var(--primary);
+    color: #000;
   }
 
-  .meta-line {
-    font-size: .875rem;
-    margin: 0 0 2.5rem;
+  .back svg {
+    width: 24px;
   }
 
-  .stage {
+  .heading {
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    margin-bottom: 2.5rem;
-  }
-
-  .stage-controls {
-    gap: .75rem;
-    margin-top: 2rem;
-  }
-
-  .start-wrap {
-    display: flex;
-    justify-content: center;
     margin-bottom: 2rem;
   }
 
+  .subtitle {
+    color: color-mix(in oklab, #424632 60%, transparent);
+  }
+
+  .progress-controls {
+    gap: .75rem;
+  }
+
   .start-btn {
-    background-color: rgb(79, 70, 229);
+    background-color: var(--play);
     width: 4rem;
     height: 4rem;
+    border: none;
     border-radius: 100%;
     color: #fff;
     display: flex;
@@ -334,10 +343,24 @@
     justify-content: center;
   }
 
+  .start-btn svg {
+    width: 2rem;
+    height: 2rem;
+    position: relative;
+    left: 2px;
+  }
+
+  .timers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
   .timer-name {
     flex: 1;
-    min-width: 0;
+    font-size: 1rem;
     font-weight: 500;
+    color: #424632;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -348,7 +371,7 @@
   }
 
   .add-wrap {
-    margin-top: 1rem;
+    margin-top: 0.75rem;
   }
 
   .timer {
@@ -364,41 +387,27 @@
     border-radius: 1rem;
   }
 
-  .timer.active {
-    border-color: #ccc;
+  .timer.current {
+    border: #ffcaab solid 1px;
   }
 
-  .timer .num {
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: 0.75rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background: rgb(237, 237, 248);
-    color: var(--muted);
-  }
-
-  .timer.active .num {
-    background: var(--primary);
-    color: #fff;
-  }
-
-  .input-bare {
-    width: 100%;
-    background: transparent;
-    border: 0;
-    outline: none;
-    padding: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: #000;
-    margin-bottom: 0.25rem;
+  .timer.completed {
+    opacity: 0.5;
   }
 
   .edit-icon {
     cursor: pointer;
+    color: #b6b6b6;
+    position: relative;
+    top: 2px;
+  }
+
+  .edit-icon svg {
+    width: 20px;
+  }
+
+  .yo {
+    display: flex;
+    justify-content: space-between;
   }
 </style>
