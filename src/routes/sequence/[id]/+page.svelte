@@ -4,12 +4,11 @@
   import { tick } from 'svelte';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/sounds';
-  import { ArrowLeft, Trash2, Plus, Play, Pause, Square, SkipForward, Timer as TimerIcon, Edit, Pen  } from 'lucide-svelte';
+  import { Trash2, Plus, Play, Pause, Square, SkipForward  } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import Modal from '$lib/Modal.svelte';
   import TimerEditor from '$lib/TimerEditor.svelte';
-  import ProgressRing from '$lib/ProgressRing.svelte';
   import NoResults from '$lib/NoResults.svelte';
 
   const id = $derived($page.params.id);
@@ -20,7 +19,6 @@
   let addingNewTimer = $state(false);
   let editingTimerId = $state(null);
   let editingSequence = $state(false);
-  let dragDisabled = $state(true);
   let activeIndex = $state(null);
   let remaining = $state(0);
   let running = $state(false);
@@ -123,6 +121,14 @@
     }));
   }
 
+  async function openTimer(id) {
+    if (!activeTimer) {
+      editingTimerId = id; 
+      await tick(); 
+      document.getElementById("add-input").focus();
+    }
+  }
+
   function deleteSequenceNow() {
     if (!sequence) return;
     removeSequence(sequence.id);
@@ -152,7 +158,6 @@
       ...s,
       timers: e.detail.items
     }));
-    dragDisabled = true;
   }
 
   const total = $derived(
@@ -171,13 +176,11 @@
 
 <div class="container">
 
-  {#if !activeTimer}
-    <header>
-      <a href="/" class="back" aria-label="Back">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-      </a>
-    </header>
-  {/if}
+  <header>
+    <a href="/" class="back" aria-label="Back">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+    </a>
+  </header>
 
   <div class="heading">
     <div class="left">
@@ -190,7 +193,11 @@
         {/if}
       </h2>
       <div class="subtitle">
-        {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
+        {#if activeTimer}
+          {formatTime(sequence.timers.slice(activeIndex).reduce((a, t, i) => a + (i === 0 ? remaining : t.seconds), 0))} remaining
+        {:else}
+          {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(total)} total
+        {/if}
       </div>
     </div>
     <div class="right">
@@ -199,20 +206,22 @@
           <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
           </button>
-        {/if}
-      {:else}
-        <div class="row progress-controls">
-          {#if running}
-            <button class="btn primary" onclick={pause}><Pause size={16} /> Pause</button>
-          {:else}
-            <button class="btn primary" onclick={resume}><Play size={16} /> Resume</button>
-          {/if}
-          <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
-          <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
-        </div>
+        {/if}       
       {/if}
     </div>
   </div>
+
+  {#if activeTimer}
+    <div class="progress-controls">
+      {#if running}
+        <button class="btn primary" onclick={pause}><Pause size={16} /> Pause</button>
+      {:else}
+        <button class="btn primary" onclick={resume}><Play size={16} /> Resume</button>
+      {/if}
+      <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
+      <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
+    </div>
+  {/if}
   
   {#if sequence.timers.length}
 
@@ -225,7 +234,7 @@
       </ProgressRing>
       -->
 
-    <div class="timers" use:dndzone={{ items: sequence.timers, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+    <div class="timers" use:dndzone={{ items: sequence.timers, dragDisabled: false, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each sequence.timers as t, i (t.id)}
         {#if editingTimerId === t.id}
           <TimerEditor
@@ -237,7 +246,7 @@
             onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
           />
         {:else}
-          <div class="timer {activeIndex === i ? 'current' : ''} {completedIndices.has(i) ? 'completed' : ''}" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: async () => { editingTimerId = t.id; await tick(); document.getElementById("add-input").focus() } }}>
+          <div class="timer" class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ onLongPress: () => navigator.vibrate?.(30), onClick: () => openTimer(t.id) }}>
             <div class="timer-name">
               {t.name}
             </div>
@@ -281,7 +290,7 @@
     <p class="muted text-small">"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
     <div class="actions">
       <button class="btn danger" onclick={deleteSequenceNow}>Delete</button>
-      <button class="btn ghost" onclick={() => (confirmDelete = false)}>Cancel</button>
+      <button class="btn ghost" onclick={() => {confirmDelete = false; editingSequence = false;}}>Cancel</button>
     </div>
   </Modal>
 {/if}
@@ -328,7 +337,11 @@
   }
 
   .progress-controls {
-    gap: .75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
   }
 
   .start-btn {
@@ -385,6 +398,8 @@
     background-color: rgb(255, 255, 255);
     border: solid 1px var(--border);
     border-radius: 1rem;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .timer.current {

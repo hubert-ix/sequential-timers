@@ -11,7 +11,7 @@
 
   let addingSequence = $state(false);
   let newName = $state('');
-  let dragDisabled = $state(true);
+  let draggingId = $state(null);
 
   function addSequence() {
     const name = newName.trim();
@@ -29,7 +29,11 @@
 
   function handleFinalize(e) {
     $sequences = e.detail.items;
-    dragDisabled = true;
+    draggingId = null;
+  }
+
+  function startDrag(id) {
+    draggingId = id;
   }
 
   function open(id) {
@@ -39,17 +43,19 @@
 
 
 <div class="container">
-
   <h1>Your sequences</h1>
 
   {#if $sequences.length}
-    <div class="sequences" use:dndzone={{ items: $sequences, dragDisabled, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+    <div
+      class="sequences"
+      use:dndzone={{ items: $sequences, dragDisabled: false, flipDurationMs: 200, dropTargetStyle: {} }}
+      onconsider={handleConsider}
+      onfinalize={handleFinalize}
+      >
       {#each $sequences as sequence (sequence.id)}
-        <div class="sequence" use:longPressEnable={{ onEnable: () => { dragDisabled = false; }, onClick: () => open(sequence.id) }}>
+        <div class="sequence" class:is-dragging={draggingId === sequence.id} use:longPressEnable={{ delay: 200, onLongPress: () => startDrag(sequence.id), onClick: () => open(sequence.id) }}>
           <div class="sequence-info">
-            <div class="sequence-name">
-              {sequence.name}
-            </div>
+            <div class="sequence-name">{sequence.name}</div>
             <div class="sequence-timers">
               {#if sequence.timers.length === 0}
                 Empty sequence
@@ -71,12 +77,11 @@
   <button class="add" onclick={async () => { addingSequence = true; await tick(); document.getElementById("add-input").focus() }}>
     <Plus size="20" /> New sequence
   </button>
-
 </div>
 
 {#if addingSequence}
   <Modal>
-    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text" autofocus onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; } }} />
+    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text" autofocus onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
     <div class="actions">
       <button class="btn primary" onclick={addSequence}>Create</button>
       <button class="btn ghost" onclick={() => { addingSequence = false; newName = ''; }}>Cancel</button>
@@ -104,6 +109,20 @@
     background-color: #fff;
     border: solid 1px var(--border);
     border-radius: 1rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    /* Prevent text selection during long press */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .sequence.is-dragging {
+    background-color: color-mix(in oklab, var(--play) 30%, white);
+    border-color: var(--play);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: scale(1.02);
+    cursor: grabbing;
+    opacity: 1 !important;
+    z-index: 10;
   }
 
   .sequence-arrow {
@@ -126,15 +145,15 @@
   }
 
   .sequence-info {
-    min-width: 0; 
+    min-width: 0;
     flex: 1;
   }
 
   .sequence-name {
     font-size: 1rem;
-    font-weight: 600; 
-    overflow: hidden; 
-    text-overflow: ellipsis; 
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
     color: #424632;
   }

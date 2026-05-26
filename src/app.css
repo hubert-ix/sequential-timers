@@ -51,14 +51,6 @@ a {
   text-decoration: none;
 }
 
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: 0;
-  background: transparent;
-  color: inherit;
-}
-
 input,
 select {
   font-family: inherit;
@@ -125,6 +117,11 @@ footer {
 }
 
 button {
+  font-family: inherit;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  color: inherit;
   padding: 0.625rem 1rem;
   border-radius: 0.75rem;
   font-size: 1rem;
