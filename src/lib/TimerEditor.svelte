@@ -18,7 +18,8 @@
   let secs = $state(initialSeconds % 60);
   let sound = $state(initialSound);
 
-  function save() {
+  function save(e) {
+    e.stopPropagation();
     const total = Math.max(1, mins * 60 + secs);
     onSave(name.trim() || initialName, total, sound);
   }
@@ -27,7 +28,7 @@
 
 <div class="editor" class:border={showBorder}>
   <div class="row">
-    <input class="input-name" id="add-input" bind:value={name} placeholder="Timer name" />
+    <input class="input-name" bind:value={name} placeholder="Timer name" />
     <div class="row">
       <select bind:value={sound} onchange={() => playSound(sound)}>
         {#each SOUND_OPTIONS as o}

@@ -1,12 +1,12 @@
 <script>
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { tick } from 'svelte';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/sounds';
-  import { Trash2, Plus, Play, Pause, Square, SkipForward  } from 'lucide-svelte';
+  import { Trash2, Move, Play, Pause, Square, SkipForward, Clock } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
+  import ProgressRing from '$lib/ProgressRing.svelte';
   import Modal from '$lib/Modal.svelte';
   import TimerEditor from '$lib/TimerEditor.svelte';
   import NoResults from '$lib/NoResults.svelte';
@@ -19,11 +19,14 @@
   let addingNewTimer = $state(false);
   let editingTimerId = $state(null);
   let editingSequence = $state(false);
+  let editingTimer = $state(false);
+  let editedTimer = $state();
   let activeIndex = $state(null);
   let remaining = $state(0);
   let running = $state(false);
   let interval = $state(null);
   let completedIndices = $state(new Set());
+  let draggingId = $state(null);
 
   $effect(() => {
     if (running) {
@@ -121,11 +124,9 @@
     }));
   }
 
-  async function openTimer(id) {
+  function openTimer(id) {
     if (!activeTimer) {
       editingTimerId = id; 
-      await tick(); 
-      document.getElementById("add-input").focus();
     }
   }
 
@@ -144,6 +145,10 @@
     editingSequence = false;
   }
 
+  function startDrag(id) {
+    draggingId = id;
+  }
+
   function handleConsider(e) {
     if (!sequence) return;
     updateSequence(sequence.id, (s) => ({
@@ -158,6 +163,7 @@
       ...s,
       timers: e.detail.items
     }));
+    draggingId = null;
   }
 
   const total = $derived(
@@ -206,7 +212,9 @@
           <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
           </button>
-        {/if}       
+        {/if}
+      {:else}
+        <!--<ProgressRing progress={progress} size={60} stroke={6} />-->
       {/if}
     </div>
   </div>
@@ -221,40 +229,26 @@
       <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
       <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
     </div>
+  {:else}
+    <div class="hint">
+      Long-press to reorder
+    </div>
   {/if}
   
   {#if sequence.timers.length}
-
-      <!--
-      <ProgressRing progress={progress} size={260} stroke={6}>
-        {#snippet children()}
-          <div class="time">{formatTime(Math.max(0, remaining))}</div>
-          <div class="name">{activeTimer.name}</div>
-        {/snippet}
-      </ProgressRing>
-      -->
-
     <div class="timers" use:dndzone={{ items: sequence.timers, dragDisabled: false, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
-      {#each sequence.timers as t, i (t.id)}
-        {#if editingTimerId === t.id}
-          <TimerEditor
-            initialName={t.name}
-            initialSeconds={t.seconds}
-            initialSound={t.sound ?? DEFAULT_SOUND}
-            onSave={(name, seconds, sound) => { updateTimer(t.id, { name, seconds, sound }); editingTimerId = null; }}
-            onCancel={() => (editingTimerId = null)}
-            onRemove={() => { removeTimer(t.id); editingTimerId = null; }}
-          />
-        {:else}
-          <div class="timer" class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ onLongPress: () => navigator.vibrate?.(30), onClick: () => openTimer(t.id) }}>
-            <div class="timer-name">
-              {t.name}
-            </div>
-            <div class="timer-time">
-              {activeIndex === i ? formatTime(Math.max(0, remaining)) : formatTime(t.seconds)}
-            </div>
+      {#each sequence.timers as timer, i (timer.id)}
+        <div class="timer" class:is-dragging={draggingId === timer.id} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {editedTimer = timer; editingTimer = true;} }}>
+          {#if draggingId === timer.id}
+            <Move size="16" />
+          {/if}
+          <div class="timer-name">
+            {timer.name}
           </div>
-        {/if}
+          <div class="timer-time">
+            {activeIndex === i ? formatTime(Math.max(0, remaining)) : formatTime(timer.seconds)}
+          </div>
+        </div>
       {/each}
       </div>
   {:else}
@@ -262,8 +256,13 @@
   {/if}
 
   {#if !activeTimer}
-    <button class="add add-wrap" onclick={async () => {addingNewTimer = true; await tick(); document.getElementById("add-input").focus()}}>
-      <Plus size={20} /> New timer
+    <button class="add" onclick={ () => { addingNewTimer = true; }}>
+      <div class="round-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+      </div>
+      <div class="label">
+        Add timer
+      </div>
     </button>
   {/if}
 
@@ -304,6 +303,20 @@
       showBorder={false}
       onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNewTimer = false; }}
       onCancel={() => (addingNewTimer = false)}
+    />
+  </Modal>
+{/if}
+
+{#if editingTimer}
+  <Modal close={() => (editingTimer = false)}>
+    <TimerEditor
+      initialName={editedTimer.name}
+      initialSeconds={editedTimer.seconds}
+      initialSound={editedTimer.sound ?? DEFAULT_SOUND}
+      showBorder={false}
+      onSave={(name, seconds, sound) => { updateTimer(editedTimer.id, { name, seconds, sound }); editingTimerId = null; editingTimer = false; }}
+      onCancel={(e) => {e.stopPropagation(); editingTimerId = null; editingTimer = false;}}
+      onRemove={(e) => {e.stopPropagation(); removeTimer(editedTimer.id); editingTimerId = null; editingTimer = false; }}
     />
   </Modal>
 {/if}
@@ -381,10 +394,17 @@
 
   .timer-time {
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
-  .add-wrap {
-    margin-top: 0.75rem;
+  .timer-icon {
+    color: #999;
+  }
+
+  .current .timer-time {
+    font-size: 1.25rem;
   }
 
   .timer {
@@ -394,12 +414,24 @@
     padding: 1rem 1.25rem;
     cursor: pointer;
     touch-action: manipulation;
-    box-shadow: rgba(0, 0, 0, 0.04) 0px 0px 0px;
-    background-color: rgb(255, 255, 255);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    outline: 1px solid rgba(0, 0, 0, 0.05);
+    outline-offset: -1px;
+    background-color: #fff4ea;
     border: solid 1px var(--border);
     border-radius: 1rem;
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  .timer.is-dragging {
+    background-color: color-mix(in oklab, var(--play) 30%, white);
+    border-color: var(--play);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: scale(1.02);
+    cursor: grabbing;
+    opacity: 1 !important;
+    z-index: 10;
   }
 
   .timer.current {

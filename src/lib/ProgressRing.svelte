@@ -1,5 +1,5 @@
 <script>
-  let { progress, size, stroke, children } = $props();
+  let { progress, size, stroke } = $props();
 
   const r = $derived((size - stroke) / 2);
   const c = $derived(2 * Math.PI * r);
@@ -33,7 +33,6 @@
       style="transition: stroke-dashoffset 900ms cubic-bezier(.2,.8,.2,1);"
     />
   </svg>
-  <div class="inner">{@render children()}</div>
 </div>
 
 

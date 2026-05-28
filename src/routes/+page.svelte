@@ -1,8 +1,7 @@
 <script>
-  import { tick } from 'svelte';
   import { sequences } from '$lib/timers-store';
   import { formatTime, uid } from '$lib/timers-store';
-  import { Plus, Play } from 'lucide-svelte';
+  import { Plus, Play, Move } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import { goto } from '$app/navigation';
@@ -45,6 +44,10 @@
 <div class="container">
   <h1>Your sequences</h1>
 
+  <div class="hint">
+    Long-press a sequence to reorder
+  </div>
+
   {#if $sequences.length}
     <div
       class="sequences"
@@ -53,7 +56,10 @@
       onfinalize={handleFinalize}
       >
       {#each $sequences as sequence (sequence.id)}
-        <div class="sequence" class:is-dragging={draggingId === sequence.id} use:longPressEnable={{ delay: 200, onLongPress: () => startDrag(sequence.id), onClick: () => open(sequence.id) }}>
+        <div class="sequence" class:is-dragging={draggingId === sequence.id} use:longPressEnable={{ delay: 300, onLongPress: () => startDrag(sequence.id), onRelease: () => { draggingId = null; }, onClick: () => open(sequence.id) }}>
+          {#if draggingId == sequence.id}
+            <Move size="16" />
+          {/if}
           <div class="sequence-info">
             <div class="sequence-name">{sequence.name}</div>
             <div class="sequence-timers">
@@ -74,14 +80,20 @@
     <NoResults heading="No sequences yet" text="Create a new awesome sequence!" />
   {/if}
 
-  <button class="add" onclick={async () => { addingSequence = true; await tick(); document.getElementById("add-input").focus() }}>
-    <Plus size="20" /> New sequence
+  <button class="add" onclick={ () => { addingSequence = true; }}>
+    <div class="round-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
+    </div>
+    <div class="label">
+      Add sequence
+    </div>
   </button>
+
 </div>
 
 {#if addingSequence}
   <Modal>
-    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text" autofocus onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
+    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text" onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
     <div class="actions">
       <button class="btn primary" onclick={addSequence}>Create</button>
       <button class="btn ghost" onclick={() => { addingSequence = false; newName = ''; }}>Cancel</button>
@@ -106,9 +118,9 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     outline: 1px solid rgba(0, 0, 0, 0.05);
     outline-offset: -1px;
-    background-color: #fff;
+    background-color: #fff4ea;
     border: solid 1px var(--border);
-    border-radius: 1rem;
+    border-radius: 24px;
     transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     /* Prevent text selection during long press */
     user-select: none;
@@ -162,9 +174,5 @@
     font-size: .875rem;
     margin-top: 0.25rem;
     color: color-mix(in oklab, #424632 60%, transparent);
-  }
-
-  .add {
-    margin-top: 1rem;
   }
 </style>

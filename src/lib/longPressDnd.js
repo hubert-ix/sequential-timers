@@ -4,33 +4,26 @@ export function longPressEnable(node, opts) {
   let startY = 0;
   let moved = false;
   let longFired = false;
-  let blocked = true; // start by blocking dnd
   let savedEvent = null;
+  let dispatching = false; // guard for our own synthetic event only
   const delay = opts.delay ?? 200;
 
   function down(e) {
-    // If this is our own re-dispatched event, let it through
-    if (!blocked) return;
-
+    if (e.button !== 0) return; // ignore right-click, middle-click, etc.
+    if (dispatching) return; // let our synthetic event through, block nothing else from here
     moved = false;
     longFired = false;
     savedEvent = e;
-
     // Block dnd from seeing this pointerdown
     e.stopImmediatePropagation();
-
     startX = e.clientX;
     startY = e.clientY;
-
     timer = window.setTimeout(() => {
       timer = null;
       longFired = true;
-      blocked = false;
-
       opts.onLongPress?.();
       navigator.vibrate?.(30);
-
-      // Re-dispatch — dnd sees it as a fresh pointerdown while finger is still down
+      dispatching = true;
       node.dispatchEvent(new PointerEvent('pointerdown', {
         pointerId: savedEvent.pointerId,
         clientX: savedEvent.clientX,
@@ -43,9 +36,7 @@ export function longPressEnable(node, opts) {
         cancelable: true,
         pressure: 1,
       }));
-
-      // Re-block for next interaction
-      blocked = true;
+      dispatching = false; // immediately re-block after dispatch
     }, delay);
   }
 
@@ -57,18 +48,26 @@ export function longPressEnable(node, opts) {
     }
   }
 
-  function up() {
+  function up(e) {
     if (timer) { clearTimeout(timer); timer = null; }
-    if (!moved && !longFired) opts.onClick?.();
+    if (e.button !== 0) return; // ignore right-click, middle-click
+    if (!moved && !longFired) {
+      opts.onClick?.();
+    } else if (longFired) {
+      // Long press fired but user released without dragging — cancel drag mode
+      opts.onRelease?.();
+    }
     savedEvent = null;
+    longFired = false;
   }
 
   function cancel() {
     if (timer) { clearTimeout(timer); timer = null; }
+    if (longFired) opts.onRelease?.();
     savedEvent = null;
+    longFired = false;
   }
 
-  // Capture phase so we run before dnd's listener
   node.addEventListener('pointerdown', down, { capture: true });
   node.addEventListener('pointermove', move);
   node.addEventListener('pointerup', up);
