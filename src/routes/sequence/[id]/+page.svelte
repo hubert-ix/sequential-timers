@@ -1,9 +1,9 @@
 <script>
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
-  import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/timers-store';
+  import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/stores/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/sounds';
-  import { Trash2, Move, Play, Pause, Square, SkipForward, Clock } from 'lucide-svelte';
+  import { Trash2, Move, Play, Pause, Square, SkipForward } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import ProgressRing from '$lib/ProgressRing.svelte';
@@ -17,16 +17,17 @@
   let nameDraft = $state('');
   let confirmDelete = $state(false);
   let addingNewTimer = $state(false);
-  let editingTimerId = $state(null);
   let editingSequence = $state(false);
   let editingTimer = $state(false);
   let editedTimer = $state();
+  let editingTimerId = $state(null);
   let activeIndex = $state(null);
   let remaining = $state(0);
   let running = $state(false);
   let interval = $state(null);
   let completedIndices = $state(new Set());
   let draggingId = $state(null);
+  let currentSound = $state(null);
 
   $effect(() => {
     if (running) {
@@ -39,7 +40,7 @@
     if (activeIndex === null || !sequence) return;
     if (remaining <= 0) {
       const finished = sequence.timers[activeIndex];
-      playSound(finished?.sound ?? DEFAULT_SOUND, 3);
+      currentSound = playSound(finished?.sound ?? DEFAULT_SOUND, 3);
       completedIndices = new Set([...completedIndices, activeIndex]);
       const next = activeIndex + 1;
       if (next < sequence.timers.length) {
@@ -71,6 +72,8 @@
   }
 
   function stop() {
+    currentSound?.stop();
+    currentSound = null;
     running = false;
     activeIndex = null;
     remaining = 0;
@@ -79,6 +82,8 @@
 
   function skip() {
     if (activeIndex === null || !sequence) return;
+    currentSound?.stop();
+    currentSound = null;
     const next = activeIndex + 1;
     if (next < sequence.timers.length) {
       completedIndices = new Set([...completedIndices, activeIndex]);
@@ -222,23 +227,19 @@
   {#if activeTimer}
     <div class="progress-controls">
       {#if running}
-        <button class="btn primary" onclick={pause}><Pause size={16} /> Pause</button>
+        <button class="primary" onclick={pause}><Pause size={16} /> Pause</button>
       {:else}
-        <button class="btn primary" onclick={resume}><Play size={16} /> Resume</button>
+        <button class="primary" onclick={resume}><Play size={16} /> Resume</button>
       {/if}
-      <button class="btn" onclick={stop}><Square size={16} /> Stop</button>
-      <button class="btn" onclick={skip}><SkipForward size={16} /> Skip</button>
-    </div>
-  {:else}
-    <div class="hint">
-      Long-press to reorder
+      <button class="ghost" onclick={stop}><Square size={16} /> Stop</button>
+      <button class="ghost" onclick={skip}><SkipForward size={16} /> Skip</button>
     </div>
   {/if}
   
   {#if sequence.timers.length}
-    <div class="timers" use:dndzone={{ items: sequence.timers, dragDisabled: false, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+    <div class="timers" use:dndzone={{ items: sequence.timers, dragDisabled: !!activeTimer, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each sequence.timers as timer, i (timer.id)}
-        <div class="timer" class:is-dragging={draggingId === timer.id} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {editedTimer = timer; editingTimer = true;} }}>
+        <div class="timer" class:is-dragging={draggingId === timer.id} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ disabled: !!activeTimer, delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {if (!activeTimer) {editedTimer = timer; editingTimer = true;}} }}>
           {#if draggingId === timer.id}
             <Move size="16" />
           {/if}
@@ -246,11 +247,21 @@
             {timer.name}
           </div>
           <div class="timer-time">
+            {#if activeIndex === i}
+              <div class="timer-circle">
+                <ProgressRing progress={progress} size={24} stroke={4} />
+              </div>
+            {/if}
             {activeIndex === i ? formatTime(Math.max(0, remaining)) : formatTime(timer.seconds)}
           </div>
         </div>
       {/each}
+    </div>
+    {#if sequence.timers.length > 1 && !activeTimer}
+      <div class="hint right">
+        Long-press to reorder
       </div>
+    {/if}
   {:else}
     <NoResults heading="No timers yet" text="Add timers to build your sequence" />
   {/if}
@@ -328,10 +339,11 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 0.5rem;
+    margin-left: 1rem;
   }
 
   .back {
-    color: #000;
+    color: var(--color-text);
   }
 
   .back svg {
@@ -343,10 +355,11 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    margin-left: 1rem;
   }
 
   .subtitle {
-    color: color-mix(in oklab, #424632 60%, transparent);
+    color: var(--color-text-muted);
   }
 
   .progress-controls {
@@ -358,7 +371,7 @@
   }
 
   .start-btn {
-    background-color: var(--play);
+    background-color: var(--color-arrow);
     width: 4rem;
     height: 4rem;
     border: none;
@@ -386,7 +399,7 @@
     flex: 1;
     font-size: 1rem;
     font-weight: 500;
-    color: #424632;
+    color: var(color-text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -394,17 +407,15 @@
 
   .timer-time {
     font-weight: 500;
+    color: var(--color-text-muted);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-  }
-
-  .timer-icon {
-    color: #999;
+    gap: 1rem;
   }
 
   .current .timer-time {
     font-size: 1.25rem;
+    color: var(--color-text);
   }
 
   .timer {
@@ -413,20 +424,14 @@
     gap: 0.75rem;
     padding: 1rem 1.25rem;
     cursor: pointer;
-    touch-action: manipulation;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    outline: 1px solid rgba(0, 0, 0, 0.05);
-    outline-offset: -1px;
-    background-color: #fff4ea;
-    border: solid 1px var(--border);
-    border-radius: 1rem;
+    background-color: var(--color-box);
+    border-radius: 1.5rem;
     user-select: none;
     -webkit-user-select: none;
   }
 
   .timer.is-dragging {
-    background-color: color-mix(in oklab, var(--play) 30%, white);
-    border-color: var(--play);
+    background-color: color-mix(in oklab, var(--color-button) 30%, white);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     transform: scale(1.02);
     cursor: grabbing;
@@ -435,7 +440,7 @@
   }
 
   .timer.current {
-    border: #ffcaab solid 1px;
+    background: var(--color-button-muted);
   }
 
   .timer.completed {

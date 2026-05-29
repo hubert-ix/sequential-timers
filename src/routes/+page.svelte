@@ -1,7 +1,7 @@
 <script>
-  import { sequences } from '$lib/timers-store';
-  import { formatTime, uid } from '$lib/timers-store';
-  import { Plus, Play, Move } from 'lucide-svelte';
+  import { sequences } from '$lib/stores/timers-store';
+  import { formatTime, uid } from '$lib/stores/timers-store';
+  import { Move, Settings } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import { goto } from '$app/navigation';
@@ -42,10 +42,12 @@
 
 
 <div class="container">
-  <h1>Your sequences</h1>
 
-  <div class="hint">
-    Long-press a sequence to reorder
+  <div class="header">
+    <h1>Your sequences</h1>
+    <a href="/settings" class="settings">
+      <Settings size="24" />
+    </a>
   </div>
 
   {#if $sequences.length}
@@ -71,11 +73,16 @@
             </div>
           </div>
           <div class="sequence-arrow">
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
           </div>
         </div>
       {/each}
     </div>
+    {#if $sequences.length > 1}
+    <div class="hint right">
+      Long-press to reorder
+    </div>
+  {/if}
   {:else}
     <NoResults heading="No sequences yet" text="Create a new awesome sequence!" />
   {/if}
@@ -103,6 +110,22 @@
 
 
 <style>
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    margin-left: 1rem;
+  }
+
+  .header h1 {
+    margin: 0;
+  }
+
+  a.settings {
+    color: var(--color-text-muted);
+  }
+
   .sequences {
     display: flex;
     flex-direction: column;
@@ -115,12 +138,8 @@
     gap: 1rem;
     padding: 1.25rem;
     cursor: pointer;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-    outline: 1px solid rgba(0, 0, 0, 0.05);
-    outline-offset: -1px;
-    background-color: #fff4ea;
-    border: solid 1px var(--border);
-    border-radius: 24px;
+    background-color: var(--color-box);
+    border-radius: 1.5rem;
     transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
     /* Prevent text selection during long press */
     user-select: none;
@@ -128,8 +147,7 @@
   }
 
   .sequence.is-dragging {
-    background-color: color-mix(in oklab, var(--play) 30%, white);
-    border-color: var(--play);
+    background-color: color-mix(in oklab, var(--color-button) 30%, white);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     transform: scale(1.02);
     cursor: grabbing;
@@ -144,9 +162,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--play);
+    background: var(--color-arrow);
     transition: all 0.2s;
-    color: #424632;
+    color: #000;
   }
 
   .sequence-arrow svg {
@@ -162,17 +180,16 @@
   }
 
   .sequence-name {
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 17px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #424632;
+    color: var(--color-text);
   }
 
   .sequence-timers {
     font-size: .875rem;
     margin-top: 0.25rem;
-    color: color-mix(in oklab, #424632 60%, transparent);
+    color: var(--color-text-muted);
   }
 </style>

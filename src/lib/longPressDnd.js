@@ -9,6 +9,7 @@ export function longPressEnable(node, opts) {
   const delay = opts.delay ?? 200;
 
   function down(e) {
+    if (opts.disabled) return;
     if (e.button !== 0) return; // ignore right-click, middle-click, etc.
     if (dispatching) return; // let our synthetic event through, block nothing else from here
     moved = false;

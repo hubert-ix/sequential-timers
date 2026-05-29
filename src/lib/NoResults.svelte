@@ -30,7 +30,7 @@
   .icon-no-results {
     width: 4rem;
     height: 4rem;
-    background: var(--secondary);
+    background: var(--color-box);
     color: #333;
     border-radius: 100%;
     display: flex;

@@ -25,7 +25,7 @@
       cy={size / 2}
       r={r}
       fill="none"
-      stroke="rgb(79, 70, 229)"
+      stroke="var(--color-button)"
       stroke-width={stroke}
       stroke-linecap="round"
       stroke-dasharray={c}
@@ -41,19 +41,10 @@
     position: relative;
   }
 
-  .ring .inner {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
   .ring-inner {
     position: absolute; 
     inset: 0; 
     border-radius: 9999px;
-    background: #fff;
+
   }
 </style>

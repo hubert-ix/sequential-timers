@@ -69,14 +69,14 @@
   .editor.border {
     padding: 1rem 1.25rem;
     border-radius: 1rem;
-    border: solid 1px var(--border);
+    border: solid 1px var(--color-border);
   }
 
   .editor select {
     padding: 0.375rem 0.5rem;
     border-radius: 0.5rem;
-    background: var(--secondary);
-    border: 1px solid var(--border);
+    background: var(--color-secondary);
+    border: 1px solid var(--color-border);
     font-size: 0.75rem;
     font-weight: 500;
   }
@@ -101,7 +101,7 @@
 
   .separator {
     font-size: 1.5rem; 
-    color: var(--muted); 
+    color: var(--color-text-muted); 
     font-weight: 300;
   }
 
