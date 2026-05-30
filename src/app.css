@@ -1,6 +1,6 @@
 :root,
 [data-palette="forest"] {
-  --color-background: oklch(97% .02 120);
+  --color-background: oklch(96.931% 0.01882 119.908);
   --color-text: oklch(22% .04 120);
   --color-text-muted: oklch(45% .04 120);
   --color-button: oklch(65% .2 130);
@@ -192,7 +192,7 @@ button {
   transition: all 0.2s;
 }
 
-button.primary {
+button.primary, button.round.primary {
   background: var(--color-button);
   color: #fff;
 }
@@ -260,6 +260,21 @@ button.add {
 
 button svg {
   vertical-align: middle;
+}
+
+button.round {
+  background: var(--color-box);
+  border-radius: 100%;
+  width: 56px;
+  height: 56px;
+  border: none;
+  justify-content: center;
+}
+
+button.round.big {
+  width: 80px;
+  height: 80px;
+  color: var(--color-text);
 }
 
 .round-icon {

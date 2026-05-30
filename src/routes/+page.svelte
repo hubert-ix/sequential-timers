@@ -148,7 +148,6 @@
 
   .sequence.is-dragging {
     background-color: color-mix(in oklab, var(--color-button) 30%, white);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     transform: scale(1.02);
     cursor: grabbing;
     opacity: 1 !important;
