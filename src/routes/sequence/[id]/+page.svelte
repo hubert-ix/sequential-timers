@@ -55,6 +55,7 @@
         activeIndex = null;
         completedIndices = new Set();
         await KeepAwake.allowSleep();
+        goto(`/sequence/${id}/done`);
       }
     }
   });
@@ -100,6 +101,7 @@
       running = false;
       activeIndex = null;
       completedIndices = new Set();
+      goto(`/sequence/${id}/done`);
     }
   }
 
