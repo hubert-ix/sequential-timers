@@ -4,13 +4,13 @@
   import { KeepAwake } from '@capacitor-community/keep-awake';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/stores/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/sounds';
-  import { Trash2, Move, Play, Pause, Square, SkipForward } from 'lucide-svelte';
+  import { Trash2, Move } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
-  import ProgressRing from '$lib/ProgressRing.svelte';
   import Modal from '$lib/Modal.svelte';
   import TimerEditor from '$lib/TimerEditor.svelte';
   import NoResults from '$lib/NoResults.svelte';
+  import Controls from './Controls.svelte';
 
   const id = $derived($page.params.id);
   const sequence = $derived($sequences.find((s) => s.id === id));
@@ -21,7 +21,6 @@
   let editingSequence = $state(false);
   let editingTimer = $state(false);
   let editedTimer = $state();
-  let editingTimerId = $state(null);
   let activeIndex = $state(null);
   let remaining = $state(0);
   let running = $state(false);
@@ -224,44 +223,7 @@
   </div>
 
   {#if activeTimer}
-    <div class="progress-controls">
-      <button class="round ghost" onclick={stop}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-square size-5" aria-hidden="true"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg>
-      </button>
-
-      {#if running}
-        <button class="round primary big ring-btn" onclick={pause}>
-          <svg class="progress-ring" viewBox="0 0 100 100" aria-hidden="true">
-            <circle class="ring-track" cx="50" cy="50" r="45"/>
-            <circle class="ring-fill" cx="50" cy="50" r="45"
-              stroke-dasharray={2 * Math.PI * 47}
-              stroke-dashoffset={2 * Math.PI * 47 * (1 - progress)}
-              style={transitioning ? '' : 'transition: none'}
-            />
-          </svg>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <rect x="14" y="3" width="5" height="18" rx="1"/><rect x="5" y="3" width="5" height="18" rx="1"/>
-          </svg>
-        </button>
-      {:else}
-        <button class="round primary big ring-btn" onclick={resume}>
-          <svg class="progress-ring" viewBox="0 0 100 100" aria-hidden="true">
-            <circle class="ring-track" cx="50" cy="50" r="46"/>
-            <circle class="ring-fill" cx="50" cy="50" r="46"
-              stroke-dasharray={2 * Math.PI * 46}
-              stroke-dashoffset={2 * Math.PI * 46 * (1 - progress)}
-            />
-          </svg>
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/>
-          </svg>
-        </button>
-      {/if}
-      
-      <button class="round ghost" onclick={skip}>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-skip-forward size-6" aria-hidden="true"><path d="M21 4v16"></path><path d="M6.029 4.285A2 2 0 0 0 3 6v12a2 2 0 0 0 3.029 1.715l9.997-5.998a2 2 0 0 0 .003-3.432z"></path></svg>
-      </button>
-    </div>
+    <Controls {running} {transitioning} {progress} {pause} {resume} {skip} {stop} />
   {/if}
   
   {#if sequence.timers.length}
@@ -270,6 +232,11 @@
         <div class="timer" class:is-dragging={draggingId === timer.id} class:upcoming={activeTimer && i > activeIndex} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ disabled: !!activeTimer, delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {if (!activeTimer) {editedTimer = timer; editingTimer = true;}} }}>
           {#if draggingId === timer.id}
             <Move size="16" />
+          {/if}
+          {#if !activeTimer && draggingId != timer.id}
+            <div class="timer-edit">
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"></path></svg>
+            </div>
           {/if}
           {#if activeTimer}
             <div class="timer-number">
@@ -281,20 +248,8 @@
             {#if completedIndices.has(i)}
               <span class="timer-badge">Finished</span>
             {/if}
-            <!--
-            {#if activeIndex === i}
-              <span class="timer-badge">Running</span>
-            {/if}
-            -->
           </div>
           <div class="timer-time">
-            <!--
-            {#if activeIndex === i}
-              <div class="timer-circle">
-                <ProgressRing progress={progress} size={24} stroke={4} />
-              </div>
-            {/if}
-            -->
             {activeIndex === i ? formatTime(Math.max(0, remaining)) : formatTime(timer.seconds)}
           </div>
         </div>
@@ -405,16 +360,8 @@
     color: var(--color-text-muted);
   }
 
-  .progress-controls {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-
   .start-btn {
-    background-color: var(--color-button);
+    background-color: var(--color-arrow);
     width: 4rem;
     height: 4rem;
     border: none;
@@ -448,6 +395,12 @@
     justify-content: center;
     width: 28px;
     height: 28px;
+  }
+
+  .timer-edit {
+    width: 20px;
+    height: 20px;
+    color: #999;
   }
 
   .timer-name {
@@ -500,6 +453,7 @@
     border-radius: 1.5rem;
     user-select: none;
     -webkit-user-select: none;
+    transition: all 0.3s;
   }
 
   .timer.is-dragging {
@@ -544,35 +498,4 @@
     display: flex;
     justify-content: space-between;
   }
-
-
-
-  
-.ring-btn {
-  position: relative;
-  border: none !important;
-}
-
-.progress-ring {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  transform: rotate(-90deg);
-  pointer-events: none;
-}
-
-.ring-track {
-  fill: none;
-  stroke: var(--color-button);
-  stroke-width: 6;
-}
-
-.ring-fill {
-  fill: none;
-  stroke: var(--color-button-muted);
-  stroke-width: 6;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 1s linear;
-}
 </style>

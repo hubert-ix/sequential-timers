@@ -6,7 +6,7 @@
   --color-button: oklch(65% .2 130);
   --color-button-muted: oklch(88% .1 120);
   --color-box: oklch(93% .03 120);
-  --color-arrow: oklch(0.78 0.1 135.78);
+  --color-arrow: oklch(0.75 0.18 127.02);
 }
 
 [data-palette="ocean"] {
@@ -34,7 +34,7 @@
   --color-text: oklch(20% .01 260);
   --color-text-muted: oklch(45% .01 260);
   --color-button: oklch(0.64 0.08 259.68);
-  --color-button-muted: oklch(0.84 0.04 259.71);
+  --color-button-muted: oklch(77.179% 0.05111 259.798);
   --color-box: oklch(93% .008 250);
   --color-arrow: oklch(0.86 0.04 260.41);
 }
@@ -207,6 +207,10 @@ button.primary:disabled {
   cursor: not-allowed;
 }
 
+button.arrow {
+  background-color: var(--color-arrow);
+}
+
 button.ghost {
   background: var(--color-secondary);
   border: 1px solid var(--color-border);
@@ -263,12 +267,16 @@ button svg {
 }
 
 button.round {
-  background: var(--color-box);
+  background: var(--color-arrow);
   border-radius: 100%;
   width: 56px;
   height: 56px;
   border: none;
   justify-content: center;
+}
+
+button.round.ghost {
+  background: var(--color-button-muted);
 }
 
 button.round.big {
