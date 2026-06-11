@@ -15,7 +15,16 @@
   </div>
 
   <div class="circle">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check size-16 text-m3-on-primary-container" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none">
+      <path
+        class="check-path"
+        d="M20 6 9 17l-5-5"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
   </div>
 
   <h1>All done</h1>
@@ -73,6 +82,12 @@
     height: 64px;
   }
 
+  .check-path {
+    stroke-dasharray: 52;
+    stroke-dashoffset: 52;
+    animation: draw-check 0.38s cubic-bezier(0.65, 0, 0.35, 1) 0.28s forwards;
+  }
+
   h1 {
     margin: 0 0 1rem 0;
     animation: fade-up 0.4s ease both;
@@ -114,5 +129,9 @@
   @keyframes fade-up {
     from { opacity: 0; transform: translateY(12px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes draw-check {
+    to { stroke-dashoffset: 0; }
   }
 </style>

@@ -90,14 +90,6 @@
     transition: stroke-dashoffset 1s linear;
   }
 
-  .bounce {
-    transition: transform 0.1s ease;
-  }
-
-  .bounce:active {
-    transform: scale(0.97);
-  }
-
   .round {
     background: transparent;
   }

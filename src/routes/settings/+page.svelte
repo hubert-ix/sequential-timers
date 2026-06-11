@@ -1,6 +1,7 @@
 <script>
   import { fade } from 'svelte/transition';
   import { palette, PALETTES } from '$lib/stores/palette';
+  import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 </script>
 
 
@@ -20,7 +21,7 @@
   <h2>Color palette</h2>
 
   {#each Object.entries(PALETTES) as [id, p]}
-    <button class="palette" class:active={$palette === id} onclick={() => palette.set(id)}>
+    <button class="palette" class:active={$palette === id} onclick={() => { palette.set(id); Haptics.impact({ style: ImpactStyle.Light }); }}>
       <div class="colors">
         {#each p.swatches as color}
           <span style="background: {color}"></span>

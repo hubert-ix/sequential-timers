@@ -69,6 +69,7 @@ body {
   min-height: 100vh;
   margin: 0;
   padding: 0;
+  overscroll-behavior: none;
 }
 
 body {
@@ -88,6 +89,8 @@ main {
   max-width: 28rem;
   margin: 0 auto;
   padding: 2.5rem 1.25rem 8rem;
+  padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  padding-top: max(1rem, env(safe-area-inset-top));
 }
 
 a {
@@ -116,6 +119,7 @@ input.text {
 h1, h2, h3 {
   font-family: var(--font-heading);
   color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 h1 {
@@ -144,6 +148,10 @@ h3 {
 
 .text-small {
   font-size: 0.875rem;
+}
+
+.sequence-timers, .subtitle, .muted {
+  letter-spacing: 0.01em;
 }
 
 footer {
@@ -302,6 +310,14 @@ button.round.big {
   align-items: center;
   justify-content: center;
   color: oklch(45% .04 120);
+}
+
+.bounce {
+  transition: transform 0.1s ease;
+}
+
+.bounce:active {
+  transform: scale(0.97);
 }
 
 .ring .label {

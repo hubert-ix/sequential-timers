@@ -6,6 +6,7 @@
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import { goto } from '$app/navigation';
+  import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
   import NoResults from '$lib/NoResults.svelte';
   import Modal from '$lib/Modal.svelte';
 
@@ -37,6 +38,7 @@
   }
 
   function open(id) {
+    Haptics.impact({ style: ImpactStyle.Light });
     goto(`/sequence/${id}`);
   }
 </script>
@@ -103,8 +105,8 @@
   <Modal>
     <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text" onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
     <div class="actions">
-      <button class="btn primary" onclick={addSequence}>Create</button>
-      <button class="btn ghost" onclick={() => { addingSequence = false; newName = ''; }}>Cancel</button>
+      <button class="btn primary bounce" onclick={addSequence}>Create</button>
+      <button class="btn ghost bounce" onclick={() => { addingSequence = false; newName = ''; }}>Cancel</button>
     </div>
   </Modal>
 {/if}

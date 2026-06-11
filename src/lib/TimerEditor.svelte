@@ -49,11 +49,11 @@
 
   <div class="row buttons">
     <div class="row save">
-      <button class="primary" onclick={save}>Save</button>
-      <button class="ghost" onclick={onCancel}>Cancel</button>
+      <button class="primary bounce" onclick={save}>Save</button>
+      <button class="ghost bounce" onclick={onCancel}>Cancel</button>
     </div>
     {#if onRemove}
-      <button class="icon ghost" onclick={onRemove} aria-label="Delete timer">
+      <button class="icon ghost bounce" onclick={onRemove} aria-label="Delete timer">
         <Trash2 size={16} />
       </button>
     {/if}

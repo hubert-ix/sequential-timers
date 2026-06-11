@@ -8,6 +8,7 @@
   import { Trash2, Move } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
+  import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
   import Modal from '$lib/Modal.svelte';
   import TimerEditor from '$lib/TimerEditor.svelte';
   import NoResults from '$lib/NoResults.svelte';
@@ -30,6 +31,7 @@
   let draggingId = $state(null);
   let currentSound = $state(null);
   let transitioning = $state(true);
+  let finishing = $state(false);
 
   $effect(() => {
     if (running) {
@@ -41,6 +43,7 @@
   $effect(async () => {
     if (activeIndex === null || !sequence) return;
     if (remaining <= 0) {
+      Haptics.notification({ type: NotificationType.Success });
       const finished = sequence.timers[activeIndex];
       currentSound = playSound(finished?.sound ?? DEFAULT_SOUND, 3);
       completedIndices = new Set([...completedIndices, activeIndex]);
@@ -52,6 +55,7 @@
         requestAnimationFrame(() => requestAnimationFrame(() => (transitioning = true)));
       } 
       else {
+        finishing = true;
         running = false;
         activeIndex = null;
         completedIndices = new Set();
@@ -63,6 +67,7 @@
 
   async function startAll() {
     if (!sequence || sequence.timers.length === 0) return;
+    await Haptics.impact({ style: ImpactStyle.Medium });
     completedIndices = new Set();
     activeIndex = 0;
     remaining = sequence.timers[0].seconds;
@@ -71,14 +76,17 @@
   }
 
   function pause() {
+    Haptics.impact({ style: ImpactStyle.Light });
     running = false;
   }
 
   function resume() {
+    Haptics.impact({ style: ImpactStyle.Light });
     running = true;
   }
 
   async function stop() {
+    Haptics.impact({ style: ImpactStyle.Medium });
     currentSound?.stop();
     currentSound = null;
     running = false;
@@ -90,6 +98,7 @@
 
   function skip() {
     if (activeIndex === null || !sequence) return;
+    Haptics.impact({ style: ImpactStyle.Light });
     currentSound?.stop();
     currentSound = null;
     const next = activeIndex + 1;
@@ -225,7 +234,7 @@
     </div>
   </div>
 
-  {#if activeTimer}
+  {#if activeTimer || finishing}
     <Controls {running} {transitioning} {progress} {pause} {resume} {skip} {stop} />
   {/if}
   
@@ -282,7 +291,7 @@
 
 {#if editingSequence}
   <Modal close={() => (editingSequence = false)}>
-    <input class="text" autofocus bind:value={nameDraft} />
+    <input class="text" bind:value={nameDraft} />
     <div class="yo">
       <div class="actions">
         <button class="primary" onclick={saveSequence}>Save sequence</button>
@@ -300,8 +309,8 @@
     <h3>Delete this sequence?</h3>
     <p class="muted text-small">"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
     <div class="actions">
-      <button class="danger" onclick={deleteSequenceNow}>Delete</button>
-      <button class="ghost" onclick={() => {confirmDelete = false; editingSequence = false;}}>Cancel</button>
+      <button class="danger bounce" onclick={deleteSequenceNow}>Delete</button>
+      <button class="ghost bounce" onclick={() => {confirmDelete = false; editingSequence = false;}}>Cancel</button>
     </div>
   </Modal>
 {/if}
@@ -398,6 +407,7 @@
     justify-content: center;
     width: 28px;
     height: 28px;
+    transition: transform 0.2s;
   }
 
   .timer-edit {
@@ -489,6 +499,7 @@
 
   .timer.current .timer-number {
     background: var(--color-button);
+    transform: scale(1.2);
   }
 
   .edit-icon {
