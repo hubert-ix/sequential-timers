@@ -31,7 +31,7 @@
   --color-arrow: oklch(0.65 0.15 350);
   --color-arrow-inside: #fff;
 }
-
+/*
 [data-palette="slate"] {
   --color-background: oklch(1 0 0);
   --color-text: oklch(20% .01 260);
@@ -40,6 +40,18 @@
   --color-button-muted: oklch(77.179% 0.05111 259.798);
   --color-box: oklch(93% .008 250);
   --color-arrow: oklch(0.86 0.04 260.41);
+}*/
+
+[data-palette="slate"] {
+  --color-background: #000;
+  --color-text: #fff;
+  --color-text-muted: lab(74.0799% 1.60432 -22.1701);
+  --color-button: oklch(0.64 0.08 259.68);
+  --color-button-muted: lab(23.2336% .906661 -11.0479);
+  --color-box: lab(23.2336% .906661 -11.0479);
+  --color-arrow: lab(73.609% 7.02977 -36.308);
+  --color-arrow-inside: #000;
+  --color-secondary: #ccc;
 }
 
 [data-palette="amber"] {
@@ -101,7 +113,7 @@ a {
 input,
 select {
   font-family: inherit;
-  color: inherit;
+  color: #000;
 }
 
 input.text {
@@ -137,7 +149,6 @@ h2 {
   gap: 0.5rem;
   align-items: center;
   margin-bottom: 0.25rem;
-  color: #424632;
 }
 
 h3 {
@@ -305,11 +316,11 @@ button.round.big {
   width: 40px;
   height: 40px;
   border-radius: 100%;
-  border: dashed 1px oklch(70% .03 120);
+  border: dashed 1px var(--color-text-muted);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: oklch(45% .04 120);
+  color: var(--color-text-muted);
 }
 
 .bounce {

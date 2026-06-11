@@ -17,15 +17,15 @@ const PALETTES = {
     bgColor: 'oklch(0.98 0.015 350)',
     swatches: ['oklch(60% .2 10)', 'oklch(88% .1 10)', 'oklch(94% .03 10)', 'oklch(0.83 0.07 6.73)']
   },
-  slate: {
-    label: 'Slate',
-    bgColor: 'oklch(1 0 0)',
-    swatches: ['oklch(45% .04 260)', 'oklch(88% .01 260)', 'oklch(93% .008 250)', 'oklch(0.86 0.04 260.41)']
-  },
   amber: {
     label: 'Earthly Amber',
     bgColor: 'oklch(0.99 0.01 74.96)',
     swatches: ['oklch(0.83 0.1 79.64)', 'oklch(88% .1 75)', 'oklch(93% .03 75)', 'oklch(0.83 0.1 79.64)']
+  },
+  slate: {
+    label: 'Dark Slate',
+    bgColor: 'oklch(1 0 0)',
+    swatches: ['#000', 'lab(23.2336% .906661 -11.0479)', 'lab(73.609% 7.02977 -36.308)', 'oklch(0.53 0.08 253.76)']
   },
 }
 const stored = browser ? localStorage.getItem('palette') ?? 'forest' : 'forest';
