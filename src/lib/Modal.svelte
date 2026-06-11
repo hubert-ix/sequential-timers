@@ -1,9 +1,11 @@
 <script>
+  import { fade } from "svelte/transition";
+
   let { children, close } = $props();
 </script>
 
 
-<div class="dialog-backdrop">
+<div class="dialog-backdrop" in:fade={{duration: 200}}>
   <div class="dialog">
     
     {@render children?.()}

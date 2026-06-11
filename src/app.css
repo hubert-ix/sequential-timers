@@ -6,27 +6,30 @@
   --color-button: oklch(65% .2 130);
   --color-button-muted: oklch(88% .1 120);
   --color-box: oklch(93% .03 120);
-  --color-arrow: oklch(0.75 0.18 127.02);
+  --color-arrow: oklch(65% .2 130);
+  --color-arrow-inside: #000;
 }
 
 [data-palette="ocean"] {
-  --color-background: oklch(0.98 0.01 219.99);
+  --color-background: oklch(0.97 0.015 230);
   --color-text: oklch(22% .04 230);
   --color-text-muted: oklch(45% .04 220);
   --color-button: oklch(55% .18 240);
   --color-button-muted: oklch(0.84 0.06 217.6);
-  --color-box: oklch(93% .03 220);
-  --color-arrow: oklch(0.8 0.05 348.31);
+  --color-box: oklch(0.93 0.03 230);
+  --color-arrow: oklch(0.55 0.13 220);
+  --color-arrow-inside: #fff;
 }
 
 [data-palette="rose"] {
-  --color-background: oklch(0.98 0.02 9.86);
+  --color-background: oklch(0.98 0.015 350);
   --color-text: oklch(22% .04 10);
   --color-text-muted: oklch(45% .04 10);
-  --color-button: oklch(60% .2 10);
-  --color-button-muted: oklch(88% .1 10);
-  --color-box: oklch(94% .03 10);
-  --color-arrow: oklch(0.92 0.13 113.28);
+  --color-button: oklch(65% .15 350);
+  --color-button-muted: oklch(0.9 0.05 350);
+  --color-box: oklch(0.94 0.03 350);
+  --color-arrow: oklch(0.65 0.15 350);
+  --color-arrow-inside: #fff;
 }
 
 [data-palette="slate"] {
@@ -46,7 +49,7 @@
   --color-button: oklch(0.73 0.06 79.84);
   --color-button-muted: oklch(0.9 0.07 75.22);
   --color-box: oklch(93% .03 75);
-  --color-arrow: oklch(0.83 0.1 79.64);
+  --color-arrow: oklch(0.82 0.13 79.08);
 }
 
 :root {
@@ -260,6 +263,11 @@ button.add {
   font-weight: 400;
   margin-top: 0.5rem;
   margin-left: 1rem;
+  transition: transform 0.1s ease;
+}
+
+button.add:active {
+  transform: scale(0.95);
 }
 
 button svg {

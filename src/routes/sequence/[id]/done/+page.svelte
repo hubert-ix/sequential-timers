@@ -4,10 +4,7 @@
 
   const id = $derived($page.params.id);
   const sequence = $derived($sequences.find((s) => s.id === id));
-
-  const total = $derived(
-    sequence ? sequence.timers.reduce((a, t) => a + t.seconds, 0) : 0
-  );
+  const total = $derived(sequence ? sequence.timers.reduce((a, t) => a + t.seconds, 0) : 0);
 </script>
 
 
@@ -67,6 +64,7 @@
     background: var(--color-button-muted);
     border-radius: 100%;
     margin: 2rem auto;
+    animation: check-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
 
   .circle svg {
@@ -77,18 +75,24 @@
 
   h1 {
     margin: 0 0 1rem 0;
+    animation: fade-up 0.4s ease both;
+    animation-delay: 0.15s;
   }
 
   .subtitle {
     margin-bottom: 2rem;
     color: var(--color-text-muted);
+    animation: fade-up 0.4s ease both;
+    animation-delay: 0.25s;
   }
 
   .summary {
     background: var(--color-box);
     border-radius: 28px;
     padding: 2rem;
-    margin-bottom: 3rem;    
+    margin-bottom: 3rem;
+    animation: fade-up 0.4s ease both;
+    animation-delay: 0.35s;
   }
 
   .back {
@@ -100,5 +104,15 @@
 
   .back svg {
     width: 24px;
+  }
+
+  @keyframes check-pop {
+    from { opacity: 0; transform: scale(0.4); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 </style>

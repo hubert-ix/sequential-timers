@@ -1,4 +1,5 @@
 <script>
+  import { fade } from 'svelte/transition';
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { KeepAwake } from '@capacitor-community/keep-awake';
@@ -187,7 +188,7 @@
 </script>
 
 
-<div class="container">
+<div class="container" in:fade>
 
   <header>
     <a href="/" class="back" aria-label="Back">
@@ -217,7 +218,7 @@
       {#if !activeTimer}
         {#if sequence.timers.length}
           <button class="start-btn" onclick={startAll} disabled={sequence.timers.length === 0}>
-            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
           </button>
         {/if}
       {/if}
@@ -325,9 +326,9 @@
       initialSeconds={editedTimer.seconds}
       initialSound={editedTimer.sound ?? DEFAULT_SOUND}
       showBorder={false}
-      onSave={(name, seconds, sound) => { updateTimer(editedTimer.id, { name, seconds, sound }); editingTimerId = null; editingTimer = false; }}
-      onCancel={(e) => {e.stopPropagation(); editingTimerId = null; editingTimer = false;}}
-      onRemove={(e) => {e.stopPropagation(); removeTimer(editedTimer.id); editingTimerId = null; editingTimer = false; }}
+      onSave={(name, seconds, sound) => { updateTimer(editedTimer.id, { name, seconds, sound }); editingTimer = false; }}
+      onCancel={(e) => {e.stopPropagation(); editingTimer = false;}}
+      onRemove={(e) => {e.stopPropagation(); removeTimer(editedTimer.id); editingTimer = false; }}
     />
   </Modal>
 {/if}
@@ -368,7 +369,7 @@
     height: 4rem;
     border: none;
     border-radius: 100%;
-    color: #fff;
+    color: var(--color-arrow-inside);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -455,7 +456,12 @@
     border-radius: 1.5rem;
     user-select: none;
     -webkit-user-select: none;
-    transition: all 0.3s;
+    transition: background-color 0.3s ease, padding 0.3s ease, opacity 0.4s ease;
+  }
+
+  .timer:active {
+    transform: scale(0.97);
+    background-color: var(--color-button-muted);
   }
 
   .timer.is-dragging {

@@ -1,9 +1,10 @@
 <script>
+  import { fade } from 'svelte/transition';
   import { palette, PALETTES } from '$lib/stores/palette';
 </script>
 
 
-<div class="container">
+<div class="container" in:fade>
 
   <header>
     <a href="/" class="back" aria-label="Back">
@@ -93,6 +94,7 @@
   button.palette svg {
     width: 24px;
     height: 24px;
+    animation: check-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .colors {
@@ -115,5 +117,10 @@
   .label {
     flex: 1;
     text-align: left;
+  }
+
+  @keyframes check-in {
+    from { opacity: 0; transform: scale(0.5); }
+    to   { opacity: 1; transform: scale(1); }
   }
 </style>

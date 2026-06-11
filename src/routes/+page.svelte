@@ -1,4 +1,5 @@
 <script>
+  import { fade } from 'svelte/transition';
   import { sequences } from '$lib/stores/timers-store';
   import { formatTime, uid } from '$lib/stores/timers-store';
   import { Move, Settings } from 'lucide-svelte';
@@ -41,10 +42,10 @@
 </script>
 
 
-<div class="container">
+<div class="container" in:fade>
 
   <div class="header">
-    <h1>Your sequences</h1>
+    <h1>Sequence timer</h1>
     <a href="/settings" class="settings">
       <Settings size="24" />
     </a>
@@ -73,7 +74,7 @@
             </div>
           </div>
           <div class="sequence-arrow">
-            <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2l10 6-10 6V2z"></path></svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play size-5" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg>
           </div>
         </div>
       {/each}
@@ -154,6 +155,11 @@
     z-index: 10;
   }
 
+  .sequence:active {
+    transform: scale(0.97);
+    background-color: var(--color-button-muted);
+  }
+
   .sequence-arrow {
     width: 2.5rem;
     height: 2.5rem;
@@ -163,14 +169,12 @@
     justify-content: center;
     background: var(--color-arrow);
     transition: all 0.2s;
-    color: #000;
+    color: var(--color-arrow-inside);
   }
 
   .sequence-arrow svg {
     width: 1rem;
     height: 1rem;
-    position: relative;
-    left: 2px;
   }
 
   .sequence-info {
