@@ -6,7 +6,7 @@
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
   import { goto } from '$app/navigation';
-  import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+  import { buzz } from '$lib/helpers';
   import NoResults from '$lib/NoResults.svelte';
   import Modal from '$lib/Modal.svelte';
 
@@ -21,6 +21,7 @@
     $sequences = [...$sequences, newSequence];
     newName = '';
     addingSequence = false;
+    buzz();
     goto("/sequence/" + newSequence.id);
   }
 
@@ -35,10 +36,10 @@
 
   function startDrag(id) {
     draggingId = id;
+    buzz();
   }
 
-  function open(id) {
-    Haptics.impact({ style: ImpactStyle.Light });
+  function openSequence(id) {
     goto(`/sequence/${id}`);
   }
 </script>
@@ -48,7 +49,7 @@
 
   <div class="header">
     <h1>Sequence timer</h1>
-    <a href="/settings" class="settings">
+    <a href="/settings" class="settings" onclick={buzz}>
       <Settings size="24" />
     </a>
   </div>
@@ -61,7 +62,7 @@
       onfinalize={handleFinalize}
       >
       {#each $sequences as sequence (sequence.id)}
-        <div class="sequence" class:is-dragging={draggingId === sequence.id} use:longPressEnable={{ delay: 300, onLongPress: () => startDrag(sequence.id), onRelease: () => { draggingId = null; }, onClick: () => open(sequence.id) }}>
+        <div class="sequence" class:is-dragging={draggingId === sequence.id} use:longPressEnable={{ delay: 300, onLongPress: () => startDrag(sequence.id), onRelease: () => { draggingId = null; }, onClick: () => openSequence(sequence.id) }}>
           {#if draggingId == sequence.id}
             <Move size="16" />
           {/if}
@@ -90,7 +91,7 @@
     <NoResults heading="No sequences yet" text="Create a new awesome sequence!" />
   {/if}
 
-  <button class="add" onclick={ () => { addingSequence = true; }}>
+  <button class="add" class:margin_top={$sequences.length == 1} onclick={ () => { addingSequence = true; }}>
     <div class="round-icon">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
     </div>

@@ -8,7 +8,7 @@
   import { Trash2, Move } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/longPressDnd';
-  import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+  import { buzz } from '$lib/helpers';
   import Modal from '$lib/Modal.svelte';
   import TimerEditor from '$lib/TimerEditor.svelte';
   import NoResults from '$lib/NoResults.svelte';
@@ -43,7 +43,6 @@
   $effect(async () => {
     if (activeIndex === null || !sequence) return;
     if (remaining <= 0) {
-      Haptics.notification({ type: NotificationType.Success });
       const finished = sequence.timers[activeIndex];
       currentSound = playSound(finished?.sound ?? DEFAULT_SOUND, 3);
       completedIndices = new Set([...completedIndices, activeIndex]);
@@ -67,7 +66,7 @@
 
   async function startAll() {
     if (!sequence || sequence.timers.length === 0) return;
-    await Haptics.impact({ style: ImpactStyle.Medium });
+    buzz();
     completedIndices = new Set();
     activeIndex = 0;
     remaining = sequence.timers[0].seconds;
@@ -76,17 +75,16 @@
   }
 
   function pause() {
-    Haptics.impact({ style: ImpactStyle.Light });
     running = false;
   }
 
   function resume() {
-    Haptics.impact({ style: ImpactStyle.Light });
+    buzz();
     running = true;
   }
 
   async function stop() {
-    Haptics.impact({ style: ImpactStyle.Medium });
+    buzz();
     currentSound?.stop();
     currentSound = null;
     running = false;
@@ -98,7 +96,6 @@
 
   function skip() {
     if (activeIndex === null || !sequence) return;
-    Haptics.impact({ style: ImpactStyle.Light });
     currentSound?.stop();
     currentSound = null;
     const next = activeIndex + 1;
@@ -127,6 +124,7 @@
       ...s,
       timers: [...s.timers, t]
     }));
+    buzz();
   }
 
   function updateTimer(tid, patch) {
@@ -137,6 +135,7 @@
         t.id === tid ? { ...t, ...patch } : t
       )
     }));
+    buzz();
   }
 
   function removeTimer(tid) {
@@ -145,11 +144,13 @@
       ...s,
       timers: s.timers.filter((t) => t.id !== tid)
     }));
+    buzz();
   }
 
   function deleteSequenceNow() {
     if (!sequence) return;
     removeSequence(sequence.id);
+    buzz();
     goto('/');
   }
 
@@ -277,7 +278,7 @@
   {/if}
 
   {#if !activeTimer}
-    <button class="add" onclick={ () => { addingNewTimer = true; }}>
+    <button class="add" class:margin_top={sequence.timers.length == 1} onclick={ () => { addingNewTimer = true; }}>
       <div class="round-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
       </div>

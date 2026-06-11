@@ -1,14 +1,14 @@
 <script>
   import { fade } from 'svelte/transition';
   import { palette, PALETTES } from '$lib/stores/palette';
-  import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
+  import { buzz } from '$lib/helpers';
 </script>
 
 
 <div class="container" in:fade>
 
   <header>
-    <a href="/" class="back" aria-label="Back">
+    <a href="/" class="back" aria-label="Back" onclick={buzz}>
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
     </a>
     <h1>Settings</h1>
@@ -21,7 +21,7 @@
   <h2>Color palette</h2>
 
   {#each Object.entries(PALETTES) as [id, p]}
-    <button class="palette" class:active={$palette === id} onclick={() => { palette.set(id); Haptics.impact({ style: ImpactStyle.Light }); }}>
+    <button class="palette" class:active={$palette === id} onclick={() => palette.set(id) }>
       <div class="colors">
         {#each p.swatches as color}
           <span style="background: {color}"></span>
