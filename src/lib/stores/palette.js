@@ -5,7 +5,7 @@ const PALETTES = {
   stock: {
     label: 'Stock Blue',
     bgColor: 'oklch(1 0 0)',
-    swatches: ['#6960f2', '#dcd7ff', '#e8e8e8', '#ada2f7']
+    swatches: ['#6960f2', '#dcd7ff', '#e8e8e8', '#a2b4f7']
   },
   forest: {
     label: 'Forest Green',
