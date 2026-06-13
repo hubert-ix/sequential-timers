@@ -4,11 +4,11 @@
   import { goto } from '$app/navigation';
   import { KeepAwake } from '@capacitor-community/keep-awake';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/stores/timers-store';
-  import { DEFAULT_SOUND, playSound } from '$lib/sounds';
+  import { DEFAULT_SOUND, playSound } from '$lib/functions/sounds';
   import { Trash2, Move } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
-  import { longPressEnable } from '$lib/longPressDnd';
-  import { buzz } from '$lib/helpers';
+  import { longPressEnable } from '$lib/functions/longPressDnd';
+  import { buzz } from '$lib/functions/helpers';
   import Modal from '$lib/Modal.svelte';
   import TimerEditor from '$lib/TimerEditor.svelte';
   import NoResults from '$lib/NoResults.svelte';

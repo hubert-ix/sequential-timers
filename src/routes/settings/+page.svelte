@@ -1,7 +1,7 @@
 <script>
   import { fade } from 'svelte/transition';
   import { palette, PALETTES } from '$lib/stores/palette';
-  import { buzz } from '$lib/helpers';
+  import { buzz } from '$lib/functions/helpers';
 </script>
 
 

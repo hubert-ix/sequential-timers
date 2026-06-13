@@ -4,9 +4,9 @@
   import { formatTime, uid } from '$lib/stores/timers-store';
   import { Move, Settings } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
-  import { longPressEnable } from '$lib/longPressDnd';
+  import { longPressEnable } from '$lib/functions/longPressDnd';
   import { goto } from '$app/navigation';
-  import { buzz } from '$lib/helpers';
+  import { buzz } from '$lib/functions/helpers';
   import NoResults from '$lib/NoResults.svelte';
   import Modal from '$lib/Modal.svelte';
 

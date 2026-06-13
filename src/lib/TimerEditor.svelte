@@ -1,5 +1,5 @@
 <script>
-  import { SOUND_OPTIONS, DEFAULT_SOUND, playSound } from '$lib/sounds';
+  import { SOUND_OPTIONS, DEFAULT_SOUND, playSound } from '$lib/functions/sounds';
   import { Volume2, Trash2 } from 'lucide-svelte';
   import SlideWheel from './SlideWheel.svelte';
 
