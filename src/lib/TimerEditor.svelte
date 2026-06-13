@@ -75,7 +75,7 @@
   .editor select {
     padding: 0.375rem 0.5rem;
     border-radius: 0.5rem;
-    background: var(--color-secondary);
+    background: var(--color-background-ghost);
     border: 1px solid var(--color-border);
     font-size: 0.75rem;
     font-weight: 500;

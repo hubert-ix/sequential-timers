@@ -2,6 +2,11 @@ import { browser } from '$app/environment';
 import { writable } from 'svelte/store';
 
 const PALETTES = {
+  stock: {
+    label: 'Stock Blue',
+    bgColor: 'oklch(1 0 0)',
+    swatches: ['#6960f2', '#dcd7ff', '#e8e8e8', '#ada2f7']
+  },
   forest: {
     label: 'Forest Green',
     bgColor: 'oklch(96.931% 0.01882 119.908)',
@@ -28,7 +33,7 @@ const PALETTES = {
     swatches: ['#000', 'lab(23.2336% .906661 -11.0479)', 'lab(73.609% 7.02977 -36.308)', 'oklch(0.53 0.08 253.76)']
   },
 }
-const stored = browser ? localStorage.getItem('palette') ?? 'forest' : 'forest';
+const stored = browser ? localStorage.getItem('palette') ?? 'stock' : 'stock';
 
 export const palette = writable(stored);
 export { PALETTES };

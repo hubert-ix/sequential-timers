@@ -160,7 +160,7 @@
 
   .sequence:active {
     transform: scale(0.97);
-    background-color: var(--color-button-muted);
+    background-color: color-mix(in oklab, var(--color-button) 30%, white);
   }
 
   .sequence-arrow {

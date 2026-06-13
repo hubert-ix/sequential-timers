@@ -164,6 +164,7 @@
   }
 
   function startDrag(id) {
+    buzz();
     draggingId = id;
   }
 
@@ -201,7 +202,7 @@
 <div class="container" in:fade>
 
   <header>
-    <a href="/" class="back" aria-label="Back">
+    <a href="/" class="back" aria-label="Back" onclick={buzz}>
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
     </a>
   </header>
@@ -240,7 +241,7 @@
   {/if}
   
   {#if sequence.timers.length}
-    <div class="timers" use:dndzone={{ items: sequence.timers, dragDisabled: !!activeTimer, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
+    <div class="timers" class:running={activeTimer} use:dndzone={{ items: sequence.timers, dragDisabled: !!activeTimer, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each sequence.timers as timer, i (timer.id)}
         <div class="timer" class:is-dragging={draggingId === timer.id} class:upcoming={activeTimer && i > activeIndex} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ disabled: !!activeTimer, delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {if (!activeTimer) {editedTimer = timer; editingTimer = true;}} }}>
           {#if draggingId === timer.id}
@@ -470,9 +471,13 @@
     transition: background-color 0.3s ease, padding 0.3s ease, opacity 0.4s ease;
   }
 
-  .timer:active {
+  .timers:not(.running) .timer:active {
     transform: scale(0.97);
     background-color: var(--color-button-muted);
+  }
+
+  .timers.running .timer {
+    cursor: default;
   }
 
   .timer.is-dragging {
@@ -500,6 +505,7 @@
 
   .timer.current .timer-number {
     background: var(--color-button);
+    color: var(--color-arrow-inside);
     transform: scale(1.2);
   }
 

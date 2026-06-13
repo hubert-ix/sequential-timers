@@ -57,7 +57,7 @@
     top: 50%;
     transform: translateY(-50%);
     height: 44px;
-    background: var(--color-secondary);
+    background: var(--color-background-ghost);
     border-radius: 0.5rem;
     pointer-events: none;
   }

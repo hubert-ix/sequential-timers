@@ -1,75 +1,78 @@
+:root {
+  --font-text: "Roboto", "Google Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-heading: "Roboto", "Google Sans", ui-sans-serif, system-ui, sans-serif;
+  --color-background-ghost: #ededf8;
+  --color-border: #323b321a;        /* has alpha */
+  --color-destructive: #e62b34;
+  --color-text-button-primary: #fff;
+  --color-text-button-ghost: #000;
+}
+
 :root,
+[data-palette="stock"] {
+  --color-background: #f6f6f6;
+  --color-text: #272727;
+  --color-text-muted: #808080;
+  --color-button: #6960f2;
+  --color-button-muted: #d7e1ff;
+  --color-box: #e8e8e8;
+  --color-arrow-inside: #fff;
+  --color-arrow: #6960f2;
+}
+
 [data-palette="forest"] {
-  --color-background: oklch(96.931% 0.01882 119.908);
-  --color-text: oklch(22% .04 120);
-  --color-text-muted: oklch(45% .04 120);
-  --color-button: oklch(65% .2 130);
-  --color-button-muted: oklch(88% .1 120);
-  --color-box: oklch(93% .03 120);
-  --color-arrow: oklch(65% .2 130);
+  --color-background: #f3f7e9;
+  --color-text: #181d06;
+  --color-text-muted: #525940;
+  --color-button: #64a500;
+  --color-button-muted: #cfe296;
+  --color-box: #e5ebd5;
+  --color-arrow: #64a500;
   --color-arrow-inside: #000;
 }
 
 [data-palette="ocean"] {
-  --color-background: oklch(0.97 0.015 230);
-  --color-text: oklch(22% .04 230);
-  --color-text-muted: oklch(45% .04 220);
-  --color-button: oklch(55% .18 240);
-  --color-button-muted: oklch(0.84 0.06 217.6);
-  --color-box: oklch(0.93 0.03 230);
-  --color-arrow: oklch(0.55 0.13 220);
+  --color-background: #ebf7fd;
+  --color-text: #031e29;
+  --color-text-muted: #3c5b65;
+  --color-button: #0079ce;
+  --color-button-muted: #9ed5e5;
+  --color-box: #d5ecf8;
+  --color-arrow: #0081a5;
   --color-arrow-inside: #fff;
 }
 
 [data-palette="rose"] {
-  --color-background: oklch(0.98 0.015 350);
-  --color-text: oklch(22% .04 10);
-  --color-text-muted: oklch(45% .04 10);
-  --color-button: oklch(65% .15 350);
-  --color-button-muted: oklch(0.9 0.05 350);
-  --color-box: oklch(0.94 0.03 350);
-  --color-arrow: oklch(0.65 0.15 350);
+  --color-background: #fff5fa;
+  --color-text: #2a1216;
+  --color-text-muted: #694c50;
+  --color-button: #d1649c;
+  --color-button-muted: #f9d1e3;
+  --color-box: #fce3ee;
+  --color-arrow: #d1649c;
   --color-arrow-inside: #fff;
 }
-/*
-[data-palette="slate"] {
-  --color-background: oklch(1 0 0);
-  --color-text: oklch(20% .01 260);
-  --color-text-muted: oklch(45% .01 260);
-  --color-button: oklch(0.64 0.08 259.68);
-  --color-button-muted: oklch(77.179% 0.05111 259.798);
-  --color-box: oklch(93% .008 250);
-  --color-arrow: oklch(0.86 0.04 260.41);
-}*/
+
+[data-palette="amber"] {
+  --color-background: #fffbf5;
+  --color-text: #2a1500;
+  --color-text-muted: #675136;
+  --color-button: #bca47d;
+  --color-button-muted: #fad8ab;
+  --color-box: #f4e6d2;
+  --color-arrow: #f1ba59;
+}
 
 [data-palette="slate"] {
   --color-background: #000;
   --color-text: #fff;
-  --color-text-muted: lab(74.0799% 1.60432 -22.1701);
-  --color-button: oklch(0.64 0.08 259.68);
-  --color-button-muted: lab(23.2336% .906661 -11.0479);
-  --color-box: lab(23.2336% .906661 -11.0479);
-  --color-arrow: lab(73.609% 7.02977 -36.308);
+  --color-text-muted: #a8b6df;
+  --color-button: #6f8dbd;
+  --color-button-muted: #374470;
+  --color-box: #323748;
+  --color-arrow: #a4b3f8;
   --color-arrow-inside: #000;
-  --color-secondary: #ccc;
-}
-
-[data-palette="amber"] {
-  --color-background: oklch(0.99 0.01 74.96);
-  --color-text: oklch(22% .05 65);
-  --color-text-muted: oklch(45% .05 70);
-  --color-button: oklch(0.73 0.06 79.84);
-  --color-button-muted: oklch(0.9 0.07 75.22);
-  --color-box: oklch(93% .03 75);
-  --color-arrow: oklch(0.82 0.13 79.08);
-}
-
-:root {
-  --font-text: "Roboto", "Google Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-heading: "Roboto", "Google Sans", ui-sans-serif, system-ui, sans-serif;
-  --color-secondary: rgb(237, 237, 248);
-  --color-border: oklch(34% .018 145/.1);
-  --color-destructive: oklch(0.6 0.22 25);
+  --color-background-ghost: #e8e8e8;
 }
 
 * {
@@ -217,7 +220,7 @@ button {
 
 button.primary, button.round.primary {
   background: var(--color-button);
-  color: #fff;
+  color: var(--color-text-button-primary);
 }
 
 button.primary.muted {
@@ -235,8 +238,9 @@ button.arrow {
 }
 
 button.ghost {
-  background: var(--color-secondary);
+  background: var(--color-background-ghost);
   border: 1px solid var(--color-border);
+  color: var(--color-text-button-ghost);
 }
 
 button.danger {
@@ -264,7 +268,7 @@ button.icon.small {
 }
 
 button.icon.ghost {
-  background-color: var(--color-secondary);
+  background-color: var(--color-background-ghost);
 }
 
 button.icon.danger {
