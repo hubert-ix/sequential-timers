@@ -44,7 +44,10 @@
     if (activeIndex === null || !sequence) return;
     if (remaining <= 0) {
       const finished = sequence.timers[activeIndex];
-      currentSound = playSound(finished?.sound ?? DEFAULT_SOUND, 3);
+      if (finished?.vibrate) {
+        Haptics.vibrate({ duration: 300 });
+      }
+      currentSound = playSound(finished?.sound ?? DEFAULT_SOUND);
       completedIndices = new Set([...completedIndices, activeIndex]);
       const next = activeIndex + 1;
       if (next < sequence.timers.length) {
@@ -112,13 +115,14 @@
     }
   }
 
-  function addTimer(name, seconds, sound) {
+  function addTimer(name, seconds, sound, vibrate) {
     if (!sequence) return;
     const t = {
       id: uid(),
       name: name.trim() || `Timer ${sequence.timers.length + 1}`,
       seconds,
-      sound
+      sound,
+      vibrate: vibrate ?? false
     };
     updateSequence(sequence.id, (s) => ({
       ...s,
@@ -135,6 +139,7 @@
         t.id === tid ? { ...t, ...patch } : t
       )
     }));
+    console.log(sequence.timers)
     buzz();
   }
 
@@ -243,7 +248,7 @@
   {#if sequence.timers.length}
     <div class="timers" class:running={activeTimer} use:dndzone={{ items: sequence.timers, dragDisabled: !!activeTimer, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each sequence.timers as timer, i (timer.id)}
-        <div class="timer" class:is-dragging={draggingId === timer.id} class:upcoming={activeTimer && i > activeIndex} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ disabled: !!activeTimer, delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {if (!activeTimer) {editedTimer = timer; editingTimer = true;}} }}>
+        <div class="timer" class:is-dragging={draggingId === timer.id} class:upcoming={activeTimer && i > activeIndex} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ disabled: !!activeTimer, delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {if (!activeTimer) {editedTimer = timer; console.log(timer); editingTimer = true;}} }}>
           {#if draggingId === timer.id}
             <Move size="16" />
           {/if}
@@ -324,7 +329,7 @@
       initialSeconds={60}
       initialSound={DEFAULT_SOUND}
       showBorder={false}
-      onSave={(name, seconds, sound) => { addTimer(name, seconds, sound); addingNewTimer = false; }}
+      onSave={(name, seconds, sound, vibrate) => { addTimer(name, seconds, sound, vibrate); addingNewTimer = false; }}
       onCancel={() => (addingNewTimer = false)}
     />
   </Modal>
@@ -336,8 +341,9 @@
       initialName={editedTimer.name}
       initialSeconds={editedTimer.seconds}
       initialSound={editedTimer.sound ?? DEFAULT_SOUND}
+      initialVibrate={editedTimer.vibrate}
       showBorder={false}
-      onSave={(name, seconds, sound) => { updateTimer(editedTimer.id, { name, seconds, sound }); editingTimer = false; }}
+      onSave={(name, seconds, sound, vibrate) => { updateTimer(editedTimer.id, { name, seconds, sound, vibrate }); editingTimer = false; }}
       onCancel={(e) => {e.stopPropagation(); editingTimer = false;}}
       onRemove={(e) => {e.stopPropagation(); removeTimer(editedTimer.id); editingTimer = false; }}
     />
