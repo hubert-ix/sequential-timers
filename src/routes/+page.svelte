@@ -104,7 +104,7 @@
 
 {#if addingSequence}
   <Modal>
-    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text" onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
+    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text margin" onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
     <div class="actions">
       <button class="btn primary bounce" onclick={addSequence}>Create</button>
       <button class="btn ghost bounce" onclick={() => { addingSequence = false; newName = ''; }}>Cancel</button>

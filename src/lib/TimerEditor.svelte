@@ -1,17 +1,17 @@
 <script>
   import { SOUND_OPTIONS, playSound } from '$lib/functions/sounds';
-  import { Volume2, Trash2 } from 'lucide-svelte';
-  import SlideWheel from './SlideWheel.svelte';
+  import { Volume2 } from 'lucide-svelte';
+  import SlideWheel from '$lib/SlideWheel.svelte';
+  import Toggle from '$lib/Toggle.svelte';
 
   let {
     initialName,
     initialSeconds,
     initialSound,
     initialVibrate = false,
-    showBorder = true,
+    initialRepeats = 1,
     onSave,
     onCancel,
-    onRemove
   } = $props();
 
   let name = $state(initialName);
@@ -19,74 +19,102 @@
   let secs = $state(initialSeconds % 60);
   let sound = $state(initialSound);
   let vibrate = $state(initialVibrate);
+  let repeats = $state(initialRepeats);
+  let previewSound = $state(null);
+
+  function previewAndSelect(id) {
+    if (previewSound) { 
+      previewSound.stop(); 
+      previewSound = null; 
+    }
+    sound = id;
+    if (id !== 'none') {
+      previewSound = playSound(id, 1);
+    }
+  }
 
   function save(e) {
     e.stopPropagation();
+    if (previewSound) { 
+      previewSound.stop(); 
+      previewSound = null; 
+    }
     const total = Math.max(1, mins * 60 + secs);
-    onSave(name.trim() || initialName, total, sound, vibrate);
+    onSave(name.trim() || initialName, total, sound, vibrate, repeats);
+  }
+
+  function cancel(e) {
+    if (previewSound) { 
+      previewSound.stop(); 
+      previewSound = null; 
+    }
+    onCancel(e);
   }
 </script>
 
 
-<div class="editor" class:border={showBorder}>
+<div class="item">
+  <label for="name">Name</label>
+  <input class="text input-name" bind:value={name} placeholder="Timer name" id="name" />
+</div>
 
-  <div class="row sound">
-    <label class="row vibrate">
-      <input type="checkbox" bind:checked={vibrate} />
-      <span>Vibrate</span>
-    </label>
-    <div class="row">
-      <select bind:value={sound} onchange={() => playSound(sound)}>
-        {#each SOUND_OPTIONS as o}
-          <option value={o.id}>{o.label}</option>
-        {/each}
-      </select>
-      <button type="button" class="icon small ghost" onclick={() => playSound(sound)} aria-label="Preview sound">
-        <Volume2 size={14} />
-      </button>
-    </div>
-  </div>
-
-  <input class="text input-name" bind:value={name} placeholder="Timer name" />
-
+<div class="item">
+  <label for="duration">Duration</label>
   <div class="row duration">
     <SlideWheel value={mins} max={99} onChange={(v) => (mins = v)} />
     <span class="separator">:</span>
     <SlideWheel value={secs} max={59} onChange={(v) => (secs = v)} />
   </div>
+</div>
 
-  <div class="row buttons">
-    <div class="row save">
-      <button class="primary bounce" onclick={save}>Save</button>
-      <button class="ghost bounce" onclick={onCancel}>Cancel</button>
+<div class="item">
+  <label for="alarm">Alarm sound</label>
+  <div class="row alarm">
+    <select bind:value={sound} onchange={() => previewAndSelect(sound)}>
+      {#each SOUND_OPTIONS as o}
+        <option value={o.id}>{o.label}</option>
+      {/each}
+    </select>
+    <button type="button" class="icon ghost" onclick={() => previewAndSelect(sound)} aria-label="Preview sound">
+      <Volume2 size={16} />
+    </button>
+  </div>
+</div>
+
+<div class="item row options">
+  <div class="repeats">
+    <label for="alarm">Alarm repeats</label>
+    <div class="row">
+      <button class="repeat" class:selected={repeats == 1} onclick={() => repeats = 1}>1x</button>
+      <button class="repeat" class:selected={repeats == 2} onclick={() => repeats = 2}>2x</button>
+      <button class="repeat" class:selected={repeats == 3} onclick={() => repeats = 3}>3x</button>
     </div>
-    {#if onRemove}
-      <button class="icon ghost bounce" onclick={onRemove} aria-label="Delete timer">
-        <Trash2 size={16} />
-      </button>
-    {/if}
+  </div>
+  <div class="vibrate">
+    <label for="alarm">Vibrate</label>
+    <Toggle bind:checked={vibrate} />
+  </div>
+</div>
+  
+<div class="row buttons">
+  <div class="row save">
+    <button class="primary bounce" onclick={save}>Save</button>
+    <button class="ghost bounce" onclick={cancel}>Cancel</button>
   </div>
 </div>
 
 
 <style>
-  .editor {
-    background: #fff;
+  .item {
+    margin-bottom: 1rem;
   }
 
-  .editor.border {
-    padding: 1rem 1.25rem;
-    border-radius: 1rem;
-    border: solid 1px var(--color-border);
-  }
-
-  .editor select {
-    padding: 0.375rem 0.5rem;
-    border-radius: 0.5rem;
-    background: var(--color-background-ghost);
-    border: 1px solid var(--color-border);
+  label {
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
     font-size: 0.75rem;
-    font-weight: 500;
+    margin-bottom: 0.25rem;
+    display: block;
   }
 
   .input-name {
@@ -95,7 +123,6 @@
   }
 
   .row.duration {
-    margin: 0.5rem 0 1rem 0; 
     justify-content: center; 
   }
 
@@ -105,26 +132,29 @@
     font-weight: 300;
   }
 
+  .row.alarm {
+    justify-content: space-between;
+  }
+
   .row.buttons {
     justify-content: space-between;
   }
 
+  .row.options {
+    justify-content: space-between;
+    align-items: start;
+  }
+
+  button.repeat.selected {
+    background-color: var(--color-button-muted);
+  }
+
+  .vibrate label {
+    margin-bottom: 0.7rem;
+  }
+
   .row.save {
     gap: .5rem;
-  }
-
-  .row.sound {
-    justify-content: space-between;
-    margin-bottom: 0.75rem
-  }
-
-  .row.vibrate {
-    padding: 0.375rem 0.5rem;
-    border-radius: 0.5rem;
-    background: var(--color-background-ghost);
-    border: 1px solid var(--color-border);
-    font-size: 0.75rem;
-    font-weight: 500;
-    gap: 0.5rem;
+    margin-top: 1rem;
   }
 </style>

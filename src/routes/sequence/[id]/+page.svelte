@@ -8,9 +8,8 @@
   import { Trash2, Move } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/functions/longPressDnd';
-  import { buzz } from '$lib/functions/helpers';
+  import { buzz, vibrateRepeat } from '$lib/functions/helpers';
   import Modal from '$lib/Modal.svelte';
-  import TimerEditor from '$lib/TimerEditor.svelte';
   import NoResults from '$lib/NoResults.svelte';
   import Controls from './Controls.svelte';
 
@@ -19,10 +18,7 @@
 
   let nameDraft = $state('');
   let confirmDelete = $state(false);
-  let addingNewTimer = $state(false);
   let editingSequence = $state(false);
-  let editingTimer = $state(false);
-  let editedTimer = $state();
   let activeIndex = $state(null);
   let remaining = $state(0);
   let running = $state(false);
@@ -45,7 +41,7 @@
     if (remaining <= 0) {
       const finished = sequence.timers[activeIndex];
       if (finished?.vibrate) {
-        Haptics.vibrate({ duration: 300 });
+        vibrateRepeat(3, 200, 250);
       }
       currentSound = playSound(finished?.sound ?? DEFAULT_SOUND);
       completedIndices = new Set([...completedIndices, activeIndex]);
@@ -113,43 +109,6 @@
       completedIndices = new Set();
       goto(`/sequence/${id}/done`);
     }
-  }
-
-  function addTimer(name, seconds, sound, vibrate) {
-    if (!sequence) return;
-    const t = {
-      id: uid(),
-      name: name.trim() || `Timer ${sequence.timers.length + 1}`,
-      seconds,
-      sound,
-      vibrate: vibrate ?? false
-    };
-    updateSequence(sequence.id, (s) => ({
-      ...s,
-      timers: [...s.timers, t]
-    }));
-    buzz();
-  }
-
-  function updateTimer(tid, patch) {
-    if (!sequence) return;
-    updateSequence(sequence.id, (s) => ({
-      ...s,
-      timers: s.timers.map((t) =>
-        t.id === tid ? { ...t, ...patch } : t
-      )
-    }));
-    console.log(sequence.timers)
-    buzz();
-  }
-
-  function removeTimer(tid) {
-    if (!sequence) return;
-    updateSequence(sequence.id, (s) => ({
-      ...s,
-      timers: s.timers.filter((t) => t.id !== tid)
-    }));
-    buzz();
   }
 
   function deleteSequenceNow() {
@@ -248,7 +207,7 @@
   {#if sequence.timers.length}
     <div class="timers" class:running={activeTimer} use:dndzone={{ items: sequence.timers, dragDisabled: !!activeTimer, flipDurationMs: 200, dropTargetStyle: {} }} onconsider={handleConsider} onfinalize={handleFinalize}>
       {#each sequence.timers as timer, i (timer.id)}
-        <div class="timer" class:is-dragging={draggingId === timer.id} class:upcoming={activeTimer && i > activeIndex} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ disabled: !!activeTimer, delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {if (!activeTimer) {editedTimer = timer; console.log(timer); editingTimer = true;}} }}>
+        <div class="timer" class:is-dragging={draggingId === timer.id} class:upcoming={activeTimer && i > activeIndex} class:current={activeIndex === i} class:completed={completedIndices.has(i)} use:longPressEnable={{ disabled: !!activeTimer, delay: 200, onLongPress: () => startDrag(timer.id), onRelease: () => { draggingId = null; }, onClick: () => {if (!activeTimer) {goto(`/sequence/${id}/timer/${timer.id}`)}} }}>
           {#if draggingId === timer.id}
             <Move size="16" />
           {/if}
@@ -284,7 +243,7 @@
   {/if}
 
   {#if !activeTimer}
-    <button class="add" class:margin_top={sequence.timers.length == 1} onclick={ () => { addingNewTimer = true; }}>
+    <button class="add" class:margin_top={sequence.timers.length == 1} onclick={ () => goto(`/sequence/${id}/timer/new`)}>
       <div class="round-icon">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
       </div>
@@ -298,14 +257,14 @@
 
 {#if editingSequence}
   <Modal close={() => (editingSequence = false)}>
-    <input class="text" bind:value={nameDraft} />
+    <input class="text margin" bind:value={nameDraft} />
     <div class="yo">
       <div class="actions">
         <button class="primary" onclick={saveSequence}>Save sequence</button>
         <button class="ghost" onclick={() => (editingSequence = false)}>Cancel</button>
       </div>
-      <button class="icon ghost" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
-        <Trash2 size={16} />
+      <button class="icon ghost delete" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 lucide-trash-2 size-5" aria-hidden="true"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
       </button>
     </div>
   </Modal>
@@ -319,34 +278,6 @@
       <button class="danger bounce" onclick={deleteSequenceNow}>Delete</button>
       <button class="ghost bounce" onclick={() => {confirmDelete = false; editingSequence = false;}}>Cancel</button>
     </div>
-  </Modal>
-{/if}
-
-{#if addingNewTimer}
-  <Modal close={() => (addingNewTimer = false)}>
-    <TimerEditor
-      initialName={`Timer ${sequence.timers.length + 1}`}
-      initialSeconds={60}
-      initialSound={DEFAULT_SOUND}
-      showBorder={false}
-      onSave={(name, seconds, sound, vibrate) => { addTimer(name, seconds, sound, vibrate); addingNewTimer = false; }}
-      onCancel={() => (addingNewTimer = false)}
-    />
-  </Modal>
-{/if}
-
-{#if editingTimer}
-  <Modal close={() => (editingTimer = false)}>
-    <TimerEditor
-      initialName={editedTimer.name}
-      initialSeconds={editedTimer.seconds}
-      initialSound={editedTimer.sound ?? DEFAULT_SOUND}
-      initialVibrate={editedTimer.vibrate}
-      showBorder={false}
-      onSave={(name, seconds, sound, vibrate) => { updateTimer(editedTimer.id, { name, seconds, sound, vibrate }); editingTimer = false; }}
-      onCancel={(e) => {e.stopPropagation(); editingTimer = false;}}
-      onRemove={(e) => {e.stopPropagation(); removeTimer(editedTimer.id); editingTimer = false; }}
-    />
   </Modal>
 {/if}
 
@@ -529,5 +460,9 @@
   .yo {
     display: flex;
     justify-content: space-between;
+  }
+
+  .delete svg {
+    width: 18px;
   }
 </style>
