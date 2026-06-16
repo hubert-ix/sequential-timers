@@ -96,7 +96,7 @@
     transition: all 0.3s;
     font-size: 1rem;
     font-weight: 300;
-    color: oklch(0.5 0.02 60 / 0.5);
+    color: oklch(0.5 0.02 60 / 0.7);
   }
 
   .wheel-scroll li.active {

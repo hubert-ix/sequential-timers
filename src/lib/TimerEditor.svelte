@@ -53,12 +53,12 @@
 </script>
 
 
-<div class="item">
+<div class="wrap">
   <label for="name">Name</label>
-  <input class="text input-name" bind:value={name} placeholder="Timer name" id="name" />
+  <input class="text" bind:value={name} placeholder="Timer name" id="name" />
 </div>
 
-<div class="item">
+<div class="wrap">
   <label for="duration">Duration</label>
   <div class="row duration">
     <SlideWheel value={mins} max={99} onChange={(v) => (mins = v)} />
@@ -67,35 +67,37 @@
   </div>
 </div>
 
-<div class="item">
-  <label for="alarm">Alarm sound</label>
-  <div class="row alarm">
-    <select bind:value={sound} onchange={() => previewAndSelect(sound)}>
-      {#each SOUND_OPTIONS as o}
-        <option value={o.id}>{o.label}</option>
-      {/each}
-    </select>
-    <button type="button" class="icon ghost" onclick={() => previewAndSelect(sound)} aria-label="Preview sound">
-      <Volume2 size={16} />
-    </button>
-  </div>
-</div>
-
-<div class="item row options">
-  <div class="repeats">
-    <label for="alarm">Alarm repeats</label>
-    <div class="row">
-      <button class="repeat" class:selected={repeats == 1} onclick={() => repeats = 1}>1x</button>
-      <button class="repeat" class:selected={repeats == 2} onclick={() => repeats = 2}>2x</button>
-      <button class="repeat" class:selected={repeats == 3} onclick={() => repeats = 3}>3x</button>
+<div class="wrap">
+  <div class="item">
+    <label for="alarm">Alarm sound</label>
+    <div class="row alarm">
+      <select bind:value={sound} onchange={() => previewAndSelect(sound)}>
+        {#each SOUND_OPTIONS as o}
+          <option value={o.id}>{o.label}</option>
+        {/each}
+      </select>
+      <button type="button" class="icon ghost" onclick={() => previewAndSelect(sound)} aria-label="Preview sound">
+        <Volume2 size={16} />
+      </button>
     </div>
   </div>
-  <div class="vibrate">
-    <label for="alarm">Vibrate</label>
-    <Toggle bind:checked={vibrate} />
+
+  <div class="item row options">
+    <div class="repeats">
+      <label for="alarm">Alarm repeats</label>
+      <div class="row">
+        <button class="repeat" class:selected={repeats == 1} onclick={() => repeats = 1}>1x</button>
+        <button class="repeat" class:selected={repeats == 2} onclick={() => repeats = 2}>2x</button>
+        <button class="repeat" class:selected={repeats == 3} onclick={() => repeats = 3}>3x</button>
+      </div>
+    </div>
+    <div class="vibrate">
+      <label for="alarm">Vibrate</label>
+      <Toggle bind:checked={vibrate} />
+    </div>
   </div>
 </div>
-  
+    
 <div class="row buttons">
   <div class="row save">
     <button class="primary bounce" onclick={save}>Save</button>
@@ -105,6 +107,13 @@
 
 
 <style>
+  .wrap {
+    background-color: var(--color-box);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
   .item {
     margin-bottom: 1rem;
   }
@@ -155,6 +164,6 @@
 
   .row.save {
     gap: .5rem;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
   }
 </style>

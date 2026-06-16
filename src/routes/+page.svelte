@@ -48,7 +48,7 @@
 <div class="container" in:fade>
 
   <div class="header">
-    <h1>Sequence timer</h1>
+    <h1>Your routines</h1>
     <a href="/settings" class="settings" onclick={buzz}>
       <Settings size="24" />
     </a>
@@ -96,7 +96,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus size-5" aria-hidden="true"><path d="M5 12h14"></path><path d="M12 5v14"></path></svg>
     </div>
     <div class="label">
-      Add sequence
+      Add routine
     </div>
   </button>
 
@@ -104,7 +104,7 @@
 
 {#if addingSequence}
   <Modal>
-    <input bind:value={newName} placeholder="Sequence name" id="add-input" class="text margin" onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
+    <input bind:value={newName} placeholder="Routine name" id="add-input" class="text margin" onkeydown={(e) => { if (e.key === 'Enter') addSequence(); if (e.key === 'Escape') { addingSequence = false; newName = ''; }}} />
     <div class="actions">
       <button class="btn primary bounce" onclick={addSequence}>Create</button>
       <button class="btn ghost bounce" onclick={() => { addingSequence = false; newName = ''; }}>Cancel</button>

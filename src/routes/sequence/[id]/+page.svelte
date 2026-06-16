@@ -260,10 +260,10 @@
     <input class="text margin" bind:value={nameDraft} />
     <div class="yo">
       <div class="actions">
-        <button class="primary" onclick={saveSequence}>Save sequence</button>
+        <button class="primary" onclick={saveSequence}>Save routine</button>
         <button class="ghost" onclick={() => (editingSequence = false)}>Cancel</button>
       </div>
-      <button class="icon ghost delete" onclick={() => (confirmDelete = true)} aria-label="Delete sequence">
+      <button class="icon ghost delete" onclick={() => (confirmDelete = true)} aria-label="Delete routine">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 lucide-trash-2 size-5" aria-hidden="true"><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
       </button>
     </div>
@@ -272,7 +272,7 @@
 
 {#if confirmDelete}
   <Modal close={() => (confirmDelete = false)}>
-    <h3>Delete this sequence?</h3>
+    <h3>Delete this routine?</h3>
     <p class="muted text-small">"{sequence.name}" and its {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} will be permanently removed.</p>
     <div class="actions">
       <button class="danger bounce" onclick={deleteSequenceNow}>Delete</button>
