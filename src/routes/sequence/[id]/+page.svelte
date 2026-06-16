@@ -43,7 +43,7 @@
       if (finished?.vibrate) {
         vibrateRepeat(3, 200, 250);
       }
-      currentSound = playSound(finished?.sound ?? DEFAULT_SOUND);
+      currentSound = playSound(finished?.sound ?? DEFAULT_SOUND, finished?.repeats ?? 1);
       completedIndices = new Set([...completedIndices, activeIndex]);
       const next = activeIndex + 1;
       if (next < sequence.timers.length) {
