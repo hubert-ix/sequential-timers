@@ -239,7 +239,7 @@
       </div>
     {/if}
   {:else}
-    <NoResults heading="No timers yet" text="Add timers to build your sequence" />
+    <NoResults heading="No timers yet" text="Add timers to build your routine" />
   {/if}
 
   {#if !activeTimer}
