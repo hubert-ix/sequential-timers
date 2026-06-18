@@ -2,10 +2,13 @@
   --font-text: "Roboto", "Google Sans", ui-sans-serif, system-ui, sans-serif;
   --font-heading: "Roboto", "Google Sans", ui-sans-serif, system-ui, sans-serif;
   --color-background-ghost: #ededf8;
-  --color-border: #323b321a;        /* has alpha */
+  --color-border: #323b321a;
   --color-destructive: #e62b34;
   --color-text-button-primary: #fff;
   --color-text-button-ghost: #000;
+  --color-button-repeat: #000;
+  --color-button-repeat-selected: #000;
+  --color-toggle: #323b321a;
 }
 
 :root,
@@ -28,7 +31,7 @@
   --color-button-muted: #cfe296;
   --color-box: #e5ebd5;
   --color-arrow: #64a500;
-  --color-arrow-inside: #000;
+  --color-arrow-inside: #fff;
 }
 
 [data-palette="ocean"] {
@@ -46,10 +49,10 @@
   --color-background: #fff5fa;
   --color-text: #2a1216;
   --color-text-muted: #694c50;
-  --color-button: #d1649c;
+  --color-button: #e76eac;
   --color-button-muted: #f9d1e3;
   --color-box: #fce3ee;
-  --color-arrow: #d1649c;
+  --color-arrow: #df72aa;
   --color-arrow-inside: #fff;
 }
 
@@ -60,7 +63,8 @@
   --color-button: #bca47d;
   --color-button-muted: #fad8ab;
   --color-box: #f4e6d2;
-  --color-arrow: #f1ba59;
+  --color-arrow: #e5bf82;
+  --color-arrow-inside: #000;
 }
 
 [data-palette="slate"] {
@@ -73,6 +77,9 @@
   --color-arrow: #a4b3f8;
   --color-arrow-inside: #000;
   --color-background-ghost: #e8e8e8;
+  --color-button-repeat: #000;
+  --color-button-repeat-selected: #fff;
+  --color-toggle: #4d5787;
 }
 
 * {

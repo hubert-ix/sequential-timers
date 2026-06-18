@@ -33,7 +33,7 @@ const PALETTES = {
     swatches: ['#000', 'lab(23.2336% .906661 -11.0479)', 'lab(73.609% 7.02977 -36.308)', 'oklch(0.53 0.08 253.76)']
   },
 }
-const stored = browser ? localStorage.getItem('palette') ?? 'stock' : 'stock';
+const stored = browser ? localStorage.getItem('palette') ?? 'forest' : 'forest';
 
 export const palette = writable(stored);
 export { PALETTES };

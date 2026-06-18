@@ -3,7 +3,7 @@
   import { page } from '$app/stores';
   import { goto } from '$app/navigation';
   import { sequences, updateSequence, uid } from '$lib/stores/timers-store';
-  import { DEFAULT_SOUND } from '$lib/functions/sounds';
+  import { buzz } from '$lib/functions/helpers';
   import TimerEditor from '$lib/TimerEditor.svelte';
 
   const id = $derived($page.params.id);
@@ -14,6 +14,7 @@
       ...s,
       timers: [...s.timers, { id: uid(), name, seconds, sound, vibrate, repeats }]
     }));
+    buzz();
     goto(`/sequence/${id}`);
   }
 </script>
@@ -22,7 +23,7 @@
 <div class="container" in:fade>
   
   <header>
-    <a href="/sequence/{sequence.id}" class="back" aria-label="Back" onclick={buzz}>
+    <a href="/sequence/{sequence.id}" class="back" aria-label="Back">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
     </a>
     <h1>New timer</h1>
@@ -30,9 +31,6 @@
 
   <TimerEditor
     initialName={`Timer ${sequence.timers.length + 1}`}
-    initialSeconds={60}
-    initialSound={DEFAULT_SOUND}
-    showBorder={false}
     onSave={handleSave}
     onCancel={() => goto(`/sequence/${id}`)}
   />

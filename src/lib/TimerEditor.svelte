@@ -1,15 +1,15 @@
 <script>
-  import { SOUND_OPTIONS, playSound } from '$lib/functions/sounds';
+  import { SOUND_OPTIONS, DEFAULT_SOUND, playSound } from '$lib/functions/sounds';
   import { Volume2 } from 'lucide-svelte';
   import SlideWheel from '$lib/SlideWheel.svelte';
   import Toggle from '$lib/Toggle.svelte';
 
   let {
     initialName,
-    initialSeconds,
-    initialSound,
+    initialSeconds = 60,
+    initialSound = DEFAULT_SOUND,
     initialVibrate = false,
-    initialRepeats = 1,
+    initialRepeats = 2,
     onSave,
     onCancel,
   } = $props();
@@ -126,11 +126,6 @@
     display: block;
   }
 
-  .input-name {
-    margin: 0;
-    line-height: 1;
-  }
-
   .row.duration {
     justify-content: center; 
   }
@@ -154,8 +149,13 @@
     align-items: start;
   }
 
+  button.repeat {
+    color: var(--color-button-repeat);
+  }
+
   button.repeat.selected {
     background-color: var(--color-button-muted);
+    color: var(--color-button-repeat-selected);
   }
 
   .vibrate label {

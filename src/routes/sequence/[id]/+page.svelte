@@ -5,7 +5,7 @@
   import { KeepAwake } from '@capacitor-community/keep-awake';
   import { sequences, updateSequence, removeSequence, formatTime, uid } from '$lib/stores/timers-store';
   import { DEFAULT_SOUND, playSound } from '$lib/functions/sounds';
-  import { Trash2, Move } from 'lucide-svelte';
+  import { Move } from 'lucide-svelte';
   import { dndzone } from 'svelte-dnd-action';
   import { longPressEnable } from '$lib/functions/longPressDnd';
   import { buzz, vibrateRepeat } from '$lib/functions/helpers';
@@ -166,7 +166,7 @@
 <div class="container" in:fade>
 
   <header>
-    <a href="/" class="back" aria-label="Back" onclick={buzz}>
+    <a href="/" class="back" aria-label="Back">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
     </a>
   </header>

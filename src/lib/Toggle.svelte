@@ -13,7 +13,7 @@
     width: 48px;
     height: 28px;
     border-radius: 999px;
-    background: var(--color-border);
+    background: var(--color-toggle);
     border: none;
     padding: 0;
     cursor: pointer;

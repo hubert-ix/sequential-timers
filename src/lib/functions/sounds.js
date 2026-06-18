@@ -14,7 +14,7 @@ export const SOUND_OPTIONS = [
   { id: 'none', label: 'None' },
 ];
 
-export const DEFAULT_SOUND = 'Echoes';
+export const DEFAULT_SOUND = 'Orion';
 
 let currentSound = null;
 let ctx = null;
