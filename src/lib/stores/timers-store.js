@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store';
 
-const KEY = 'consecutive-timers-v1';
+const KEY = 'timeflow-v1';
 
 function seed() {
   return [

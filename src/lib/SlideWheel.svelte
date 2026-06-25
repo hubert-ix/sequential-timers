@@ -10,17 +10,15 @@
   $effect(() => {
     if (!el) return;
     const target = value * ITEM_H;
-    if (Math.abs(el.scrollTop - target) > 1) {
-      ignore = true;
-      el.scrollTo({ top: target, behavior: 'smooth' });
-      setTimeout(() => {
-        ignore = false;
-      }, 350);
-    }
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.scrollTop = target;
+      });
+    });
   });
 
   function onScroll() {
-    if (!el || ignore) return;
+    if (!el) return;
     const idx = Math.round(el.scrollTop / ITEM_H);
     const clamped = Math.max(0, Math.min(max, idx));
     if (clamped !== value) onChange(clamped);

@@ -70,7 +70,7 @@
             <div class="sequence-name">{sequence.name}</div>
             <div class="sequence-timers">
               {#if sequence.timers.length === 0}
-                Empty sequence
+                Empty routine
               {:else}
                 {sequence.timers.length} timer{sequence.timers.length === 1 ? '' : 's'} · {formatTime(sequence.timers.reduce((a, t) => a + t.seconds, 0))}
               {/if}
@@ -88,7 +88,7 @@
     </div>
   {/if}
   {:else}
-    <NoResults heading="No sequences yet" text="Create a new awesome sequence!" />
+    <NoResults heading="No routines yet" text="Create a new awesome routine!" />
   {/if}
 
   <button class="add" class:margin_top={$sequences.length == 1} onclick={ () => { addingSequence = true; }}>
