@@ -1,14 +1,14 @@
 <script>
   let { value, max, onChange } = $props();
+  let el;
+  let userScrolling = false;
+  let scrollTimer;
 
   const ITEM_H = 44;
-  let el;
-  let ignore = false;
-
   const items = $derived(Array.from({ length: max + 1 }, (_, i) => i));
 
   $effect(() => {
-    if (!el) return;
+    if (!el || userScrolling) return;
     const target = value * ITEM_H;
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -19,6 +19,11 @@
 
   function onScroll() {
     if (!el) return;
+    userScrolling = true;
+    clearTimeout(scrollTimer);
+    scrollTimer = setTimeout(() => {
+      userScrolling = false;
+    }, 150);
     const idx = Math.round(el.scrollTop / ITEM_H);
     const clamped = Math.max(0, Math.min(max, idx));
     if (clamped !== value) onChange(clamped);
